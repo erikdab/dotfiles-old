@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+# SUP! This is System UPgrade! (also Silent UPgrade - no prompts)
+# Run up with default options (keep pressing enter).
+cry "" | up

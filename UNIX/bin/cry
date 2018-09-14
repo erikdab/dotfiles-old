@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ $# -ge 1 ]
+then
+    while true; do echo "$1"; sleep 1; done
+else
+    while true; do echo y; sleep 1; done
+fi
