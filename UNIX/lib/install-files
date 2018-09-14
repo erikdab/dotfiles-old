@@ -83,6 +83,9 @@ case $WHARDWARE in
     urf_lnrepo zsh-dircolors.config ~/.zsh-dircolors.config
     ;|
 (Linux-x86*)
+    # Make directory for libsecret keyring dev
+    sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
+    
     # Tilix VTE fix:
     if [ ! -L /etc/profile.d/vte.sh ]; then
 	echo $(urf_bold "Fix VTE for Tilix")

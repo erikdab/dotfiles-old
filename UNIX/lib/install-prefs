@@ -55,6 +55,9 @@ case $WHARDWARE in
     #setupsolarized dircolors.ansi-light
     ;|
 (Linux-x86*)
+    # Only for Ubuntu? Already in .gitconfig
+    #git config --global credential.helper /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+
     # Nautilus Bookmarks
     # Could be host specific if needed.
     # TODO: urf_sync backup restore!
