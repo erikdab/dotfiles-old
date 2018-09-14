@@ -1,0 +1,49 @@
+#!/usr/bin/env zsh
+
+# Functions
+# - ensureLoginItems: ensure user login items are setup
+# - safariExtensions: list installed Safari extensions
+
+# LOGIN ITEMS ------------------------------------------------------------------
+# Add an Item
+#osascript -e 'tell application "System Events" to make login item at end with properties {path:"/path/to/itemname", hidden:false}'
+
+# Remove an Item
+#osascript -e 'tell application "System Events" to delete login item "itemname"'
+
+# List all Items:
+#osascript -e 'tell application "System Events" to get the name of every login item'
+
+# Links:
+# Login Items: http://hints.macworld.com/article.php?story=20111226075701552
+
+ensureLoginItems() {
+    # @: array of strings with 3 words: name, path and hidden(true/false)
+    local t=("$@")
+    local login_items="$(osascript -e 'tell application "System Events" to get the name of every login item')"
+    for ((i = 1; i < $#t; i+=3)); do
+	local _name=$t[i]
+	local _path=$t[i+1]
+	local _hidden=$t[i+2]
+        if ! urf_contains $login_items $_name; then
+            /usr/bin/osascript -e 'tell application "System Events" to make login item at end with properties {name:"'$_name'", path:"'$_path'", hidden:'$_hidden'}'
+    	fi
+    done
+}
+
+safariExtensions() {
+    defaults read ~/Library/Safari/Extensions/extensions | awk '
+/Bundle Directory/ {
+    split($0, t, /\"/);
+    sub(".safariextension", "", t[4]);
+    sub("-1", "", t[4]);
+    bundle=t[4]
+    e="disabled"
+}
+/Enabled/ {
+    e="enabled";
+}
+/Hidden Bars/ {
+    print bundle, "...", e
+}' | sort --ignore-case
+}

@@ -1,0 +1,171 @@
+#!/usr/bin/env zsh
+
+# Functions (apt-get)
+# - isinstalled: is a package installed
+# - requirepkg: make sure a package is installed
+# - installdeb: install a .deb file
+# - installjide: install a Jetbrains IDE from a .tar.gz
+# - installeclipse: install an Eclipse IDE from a .tar.gz
+# - installdesktop: install desktop files from source folder to destination folder
+# - linkfiles: link files from one folder to another
+# - installrepos: install an array of apt-get or PPA repositories
+# - installpkgs: install pkgs (list in a string) from apt-get/PPAs
+# - removepkgs: remove pkgs (list in a string)
+# - listrepos: list currently setup repositories
+# - listppas: list currently setup ppas
+
+isinstalled() {
+    # 1: package file name
+    ! [ -z "$(dpkg-query -l $1 2>/dev/null | grep '^ii\s*'$1'\s*')" ]
+}
+
+requirepkg() {
+    # 1: package file name
+    if ! isinstalled $1; then
+	echo "Install: $1"
+	sudo apt-get install -y "$1"
+    fi
+}
+
+installdeb() {
+    # 1: package file name
+    # 2: deb file to install
+    if ! isinstalled $1; then
+	if [ -f "$2" ]; then
+	    echo "Install: $1"
+	    sudo apt-get install -f "$2"
+	else
+	    echo "Optional: $1, not in Downloads"
+	fi
+    fi
+}
+
+installjide() {
+    # 1: idea name
+    # 2: software_dir
+    # 3: script to run after installation (from inside install directory)
+    if [ ! -d /opt/${1} ]; then
+	local JIDE_FILE="$(find ${2} -name "${1}-*.tar.gz")"
+	if [ -f "$JIDE_FILE" ]; then
+	    echo "Install: $1"
+	    sudo mkdir -p /opt/${1}
+	    sudo mkdir -p /tmp/${1}
+	    sudo tar xf $JIDE_FILE -C /tmp/${1}
+	    sudo mv /tmp/${1}/*/* /opt/${1}/
+	    sudo rm -rf /tmp/${1}
+	    if [ ! -z "$3" ]; then
+		x-terminal-emulator -e ~/bin/setup/hackyrun sh /opt/${1}/${3}
+	    fi
+	else
+	    echo "Optional: $1, not installed - not in Downloads"
+	fi
+    fi
+}
+
+installeclipse() {
+    # 1: idea name
+    # 2: software_dir
+    # 3: script to run after installation (from inside install directory)
+    if [ ! -d ~/eclipse ]; then
+	local JIDE_FILE="$(find ${2} -name "${1}-*.tar.gz")"
+	if [ -f "$JIDE_FILE" ]; then
+	    echo "Install: $1"
+	    sudo mkdir -p /tmp/${1}
+	    sudo tar xf $JIDE_FILE -C /tmp/${1}
+	    if [ ! -z "$3" ]; then
+		x-terminal-emulator -e ~/bin/setup/hackyrun /tmp/${1}/*/${3}
+	    fi
+	else
+	    echo "Optional: $1, not installed - not in Downloads"
+	fi
+    fi
+}
+
+installdesktop() {
+    # 1: desktop files source
+    # 2: desktop files destination
+    # 3: destination name
+    for desktop in $1/*.desktop; do
+	mkdir -p $2
+	local desktop_local=$2/${desktop##*/}
+	if [ ! -f $desktop_local ]; then
+	    echo "Copied desktop file to $3: ${desktop##*/}"
+            cp $desktop $desktop_local
+	    chmod +x $desktop_local
+	fi
+    done
+}
+
+linkfiles() {
+    # 1: folder with files to link
+    # 2: folder to link source files into
+    # 3: name of destination folder (for readible messages on stdout)
+    local fsource=$1
+    local fdest=$2
+    local fname=$3
+    for file in $fsource/*; do
+        mkdir -p $fdest
+	local file_local=$fsource/${file##*/}
+        if [ ! -f $file_local ]; then
+	    echo "Copied file to $fname: ${file##*/}"
+            ln -fs $file $file_local
+        fi
+    done
+}
+
+installrepos() {
+    # @: repos to install (array)
+    local repo_added=false
+    for repo in $@; do
+	if [ -z "$(list_repos | grep "$repo")" ]; then
+	    echo "Adding repository via add-apt-repository: $repo"
+	    sudo add-apt-repository "$repo"
+	    repo_added=true
+	fi
+    done
+    if $repo_added; then
+	sudo apt update; sudo apt upgrade -y;
+    fi
+}
+
+installpkgs() {
+    # @: string of pkgs to install
+    for pkg in ${=@}; do
+	if ! isinstalled $pkg; then
+	    echo "Installing new software via apt-get (trigger: $pkg)"
+	    sudo apt update
+	    sudo apt upgrade -y
+	    sudo apt install -y $(echo $@)
+	    sudo apt autoremove -y
+	    break
+	fi
+    done
+}
+
+removepkgs() {
+    # @: string of pkgs to remove
+    for pkg in ${=@}; do
+	if isinstalled $pkg; then
+	    echo "Removing software via apt-get (trigger: $pkg)"
+	    sudo apt remove -y $(echo $@)
+	    break
+	fi
+    done
+}
+
+isalternative() {
+    # 1: alternative type
+    # 2: alternative program
+    EDITOR_DEFAULTS=`update-alternatives --get-selections| grep "$1" | awk 'index("'"$2"'", $1)' | wc -l`
+    echo $EDITOR_DEFAULTS
+}
+
+list_repos() {
+    grep -E '^deb\s' /etc/apt/sources.list /etc/apt/sources.list.d/*.list |\
+	cut -f2- -d: |\
+	sed -re 's#.*?http://ppa\.launchpad\.net/([^/]+)/([^/]+)(.*?)$#ppa:\1/\2#g'
+}
+
+list_ppas() {
+    list_repos | grep '^ppa:'
+}

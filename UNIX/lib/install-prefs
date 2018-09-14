@@ -1,0 +1,137 @@
+#!/usr/bin/env zsh
+echo $(urf_bold "Setting everything up just right...")
+
+git config --global core.excludesfile $(urf_repofile gitignore_global)
+
+# Restore options which can be automatically backed up/restored
+urf_sync --restore
+
+case $WHARDWARE in
+(Darwin*)
+    source functions-macos
+
+    # macOS File Associations!
+    # Debug: duti -v ~/.duti
+    duti ~/.duti
+    
+    # ZSH ls colors
+    # Still doesn't work?
+    #setupsolarized gdircolors.ansi-light
+
+    # macOS GIT save credentials in Keychain
+    # Is already set in .gitconfig
+    #git config --global credential.helper osxkeychain
+    urf_arrayread $(urf_repofile loginItems)
+    local add_items=$read_array
+    ensureLoginItems $add_items
+
+    if ! urf_contains "$(safariExtensions)" "PiPTool"; then
+        curl -o /tmp/PiPTool.safariextz https://bfmatei.github.io/extensions/PiPTool.safariextz
+	open /tmp/PiPTool.safariextz
+    fi
+    
+    # local login_items="$(osascript -e 'tell application "System Events" to get the name of every login item')"
+    # if ! urf_contains $login_items 'Emacs'; then
+    # 	osascript -e 'tell application "System Events" to make login item at end with properties {name:"Emacs", path:"/Applications/Emacs.app", hidden:false}'
+    # fi
+    
+    # Fix quick look plugin launch services:
+    # /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user ; killall Dock
+    
+    # Could potentially place all customizations in the macos script..
+    source prefs-macos
+    ;;
+(Linux*)
+    source functions-linux
+    
+    if [ $(isalternative emacs "editor") -ne 1 ]; then
+	echo $(urf_bold "Set emacs alternatives")
+	sudo update-alternatives --install /usr/bin/editor editor /usr/bin/emacs 60
+	sudo update-alternatives --config editor
+    fi
+
+    # ZSH ls colors
+    # TODO: fix
+    #setupsolarized dircolors.ansi-light
+    ;|
+(Linux-x86*)
+    # Nautilus Bookmarks
+    # Could be host specific if needed.
+    # TODO: urf_sync backup restore!
+    # BOOKMARKS_FILE=~/.config/gtk-3.0/bookmarks
+    # BOOKMARKS="file:///home/erik/Dropbox"
+    # BOOKMARKS=$BOOKMARKS" file:///home/erik/Dropbox/Documents/College"
+    # BOOKMARKS=$BOOKMARKS" file:///home/erik/Dropbox/ADBs"
+    # BOOKMARKS=$BOOKMARKS" file:///home/erik/Dropbox/ADBs/AAIs"
+    # BOOKMARKS=$BOOKMARKS" file:///home/erik/Dropbox/org"
+    # for bookmark in $BOOKMARKS; do
+    # 	if ! grep -q $bookmark $BOOKMARKS_FILE ; then
+    # 	    echo $(urf_bold "Add bookmark: "$bookmark)
+    # 	    echo $bookmark >> $BOOKMARKS_FILE
+    # 	fi
+    # done
+
+    # TODO: Remove previously used
+
+    # Gnome Shell theme
+    # Currently prefer the Ubuntu theme. If I find another theme I like, place it here :)
+    # THEMES=$HOME"/.local/share/theme"
+    # if [ ! -d $THEMES ]; then
+    #     mkdir -p $THEMES
+    #     git clone https://github.com/godlyranchdressing/Minwaita.git /tmp/Minwaita-master
+    #     tar -xf /tmp/Minwaita-master/Minwaita-OSX.tar.gz -C $THEMES Minwaita-OSX
+    #     sudo rm -r /tmp/Minwaita-master
+    # fi
+
+    # NUMIXFOLDERFIX=~/.config/numix-folders
+    # if [ ! -f $NUMIXFOLDERFIX ]; then
+    # 	git clone https://github.com/numixproject/numix-folders /tmp/numix-folder-master
+    # 	cd /tmp/numix-folder-master/
+    # 	echo -e "6\ngreen\n" | sudo bash numix-folders -t
+    # 	cd -
+    # 	sudo rm -r /tmp/numix-folder-master
+    # fi
+
+    # Grub {{{
+    # Fix: doesn't work on laptop?
+    if grep -q "#GRUB_GFXMODE" /etc/default/grub; then
+	GUESS=`xrandr | grep primary | awk '{print $4}' | grep -Po '\d+x\d+'`
+	echo $(urf_bold "Enter grub resolution (primary monitor is: $GUESS): ")
+	read resolution
+	sudo sed -ie "s/.\?GRUB_GFXMODE=.\+/GRUB_GFXMODE=${resolution}/g" /etc/default/grub
+	sudo update-grub
+    fi
+
+    # IF UBUNTU
+    # Defaults
+    if [ $(isalternative nvim "vivim") -ne 2 ]; then
+	echo $(urf_bold "Set neovim alternatives")
+	sudo update-alternatives --install /usr/bin/vi vi /usr/bin/nvim 60
+	#sudo update-alternatives --config vi
+	sudo update-alternatives --install /usr/bin/vim vim /usr/bin/nvim 60
+	#sudo update-alternatives --config vim
+    fi
+    if [ $(isalternative tilix "x-terminal-emulator") -ne 1 ]; then
+	echo $(urf_bold "Set x-terminal-emulator=tilix alternatives")
+	sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/tilix 60
+	#sudo update-alternatives --config x-terminal-emulator
+    fi
+
+    # PROGRAM SETTINGS -------------------------------------------------------------
+    # Tilix {{{
+    if [ ! -f /usr/share/nautilus-python/extensions/open-tilix.py ]; then
+	echo $(urf_bold "Enable 'Open in Tilix' Nautilus plugin.")
+	urf_cprepo open-tilix.py /usr/share/nautilus-python/extensions/open-tilix.py -sudo
+	# Restart to enable "Open in Tilix"
+	nautilus -q
+    fi
+    ;;
+(Linux-arm*Raspbian*)
+    # https://www.raspberrypi.org/documentation/remote-access/ssh/
+    # For headless setup, SSH can be enabled by placing a file named ssh, without any extension,
+    # onto the boot partition of the SD card from another computer.
+    sudo systemctl enable ssh
+    sudo systemctl start ssh
+    # https://www.raspberrypi.org/documentation/configuration/security.md
+    # https://www.raspberrypi.org/documentation/configuration/raspi-config.md
+esac

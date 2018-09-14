@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+# Goto lib and run urdots script
+cd "$(dirname "$0")"/../lib
+source urdots.zsh

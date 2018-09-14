@@ -1,0 +1,114 @@
+#!/usr/bin/env zsh
+echo $(urf_bold "Slynking data...")
+
+# Emacs
+urf_lnrepo emacs.d ~/.emacs.d
+# Neovim (works in macOS?)
+urf_lnrepo init.vim ~/.config/nvim/init.vim
+# Git
+urf_lnrepo gitconfig ~/.gitconfig
+# Zsh config
+urf_lnrepo zshrc ~/.zshrc
+urf_lnrepo zshenv ~/.zshenv
+
+case $WHARDWARE in
+(*x86*)
+    # Link commonly accessed folders from Dropbox
+    urf_ln ~/Dropbox/Documents/College ~/College
+    urf_ln ~/Dropbox/Documents ~/Documents/DDocuments
+    urf_ln ~/Dropbox/Computer\ Science ~/CS
+    urf_ln ~/Dropbox/Photos ~/Pictures/Photos
+    urf_ln ~/Dropbox/org ~/org
+    mkdir -p ~/repos
+    
+    # Font
+    local font_dir=$(urf_namedurl fonts)
+    if [ ! -f $font_dir"/Fantasque Sans Mono Regular Nerd Font Complete Mono.ttf" ]; then
+	echo $(urf_bold "Installing terminal font: FantasqueSansMono Nerd Font")
+	mkdir -p $font_dir
+	cp -f $(urf_repofile Fantasque-Nerd)/Fantasque* $font_dir/
+    fi
+    
+    if [ ! -f $font_dir"/Sauce Code Pro Nerd Font Complete Mono Windows Compatible.ttf" ]; then
+	echo $(urf_bold "Installing terminal font: Sauce Code Pro Nerd Font")
+	mkdir -p $font_dir
+	cp -f $(urf_repofile SauceCodePro)/Sauce* $font_dir/
+    fi
+
+    # Firefox Profile
+    local firefox_profiles=$(urf_namedurl firefox)
+    if [ $WKERNEL = "Darwin" ] && [ ! -d $firefox_profiles ]; then
+ 	echo $(urf_bold "Opening Firefox to create Profiles directory...")
+	open -a Firefox.app
+	while [ ! -d $firefox_profiles ]; do
+	    sleep 1
+	done
+    fi
+    local firefox_profile="$(find $firefox_profiles -name "*.default")"
+    if [ -d $firefox_profile ]; then
+	urf_lnrepo userChrome.css $firefox_profile/chrome/userChrome.css
+    fi
+
+    # Jetbrains
+    urf_lnrepo ideavimrc ~/.ideavimrc
+
+    urf_lnrepo keepassxc.ini "$(urf_namedurl keepassxc)/keepassxc.ini"
+    ;|
+(Darwin*)
+    # Aquamacs does not load .emacs.d/init.el, but it does from here.
+    urf_lnrepo emacs.d/init.el ~/Library/Preferences/Aquamacs\ Emacs/Preferences.el
+
+    # Allows for: duti ~/.duti
+    urf_lnrepo duti ~/.duti
+    
+    # Allows for: brew bundle --global
+    urf_lnrepo Brewfile ~/.Brewfile
+
+    # Create pyenv cache directory (place in urf_namedurl)
+    #mkdir -p ~/Library/Caches/pyenv
+    urf_lnrepo karabiner ~/.config/karabiner
+
+    urf_ln "/Users/erik/Library/Mobile Documents/com~apple~CloudDocs/iDocuments" ~/Documents/iDocuments
+
+    urf_lnrepo SolarizedLight.dvtcolortheme ~/Library/Developer/Xcode/UserData/FontAndColorThemes/SolarizedLight.dvtcolortheme
+
+    # Cyberduck
+    # https://trac.cyberduck.io/wiki/help/en/faq#Preferencesandapplicationsupportfileslocation
+    urf_lnrepo Cyberduck/Bookmarks "/Users/erik/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Bookmarks"
+    urf_lnrepo Cyberduck/ch.sudo.cyberduck.plist /Users/erik/Library/Preferences/ch.sudo.cyberduck.plist
+    ;;
+(Linux*)
+    source functions-linux
+    
+    urf_lnrepo zsh-dircolors.config ~/.zsh-dircolors.config
+    ;|
+(Linux-x86*)
+    # Tilix VTE fix:
+    if [ ! -L /etc/profile.d/vte.sh ]; then
+	echo $(urf_bold "Fix VTE for Tilix")
+	VTE=$(ls /etc/profile.d/ | grep vte-)
+	sudo ln -fs /etc/profile.d/$VTE /etc/profile.d/vte.sh
+    fi
+
+    # Gnome Desktop file stuffs
+    ln -fs $(urf_repofile desktop/mimeapps.list) ~/.local/share/applications/
+    installdesktop $(urf_repofile desktop) ~/.local/share/applications "applications"
+    installdesktop $(urf_repofile desktop/autostart) ~/.config/autostart "autostart"
+    # linkfiles ~/Dropbox/Setup/icons ~/.local/share/icons "icons"
+
+    # KeePassX
+    urf_lnrepo keepassx2.ini ~/.config/keepassx/keepassx2.ini
+    
+    # LaTeX local config
+    urf_lnrepo tex_latex_local ~/texmf/tex/latex/local
+
+    # Conky
+    urf_lnrepo conkyrc ~/.conkyrc
+
+    # Pyenv
+    #urf_lnrepo pyenv_version ~/.pyenv/version
+
+    # Zathura
+    urf_lnrepo zathura ~/.config/zathura
+    urf_lnrepo zathura-history ~/.local/share/zathura/history
+esac

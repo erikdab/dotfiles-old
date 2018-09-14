@@ -1,0 +1,130 @@
+#!/usr/bin/env zsh
+echo $(urf_bold "Installing programs...")
+
+case $WHARDWARE in
+(Darwin*)
+    # if [ ! -d ~/.oh-my-zsh ]; then
+    #     echo $(urf_bold "Installing OMZ in seperate window...")
+    #     osascript -e 'tell application "Terminal" to do script "sh -c \"$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)\""'
+    # fi
+
+    if [ ! "$(mas account)" = "er.burnell@gmail.com" ]; then
+	mas signin er.burnell@gmail.com
+    fi
+
+    if urf_yNprompt "Update System? (Y/n)"; then
+	echo $(urf_bold "Ensuring Brewery is up to date...")
+	brew update && brew outdated && brew upgrade && brew cleanup && brew cask upgrade
+
+	echo $(urf_bold "Ensuring Cellar is fully stocked...")
+	local wbrewfile=$(urf_repofile Brewfile)
+	if ! urf_contains "$(brew bundle check --file=$wbrewfile)" "dependencies are satisfied"; then
+	    brew bundle -v --file=$wbrewfile
+	fi
+    fi
+    
+    # Magnet
+    #mas install 441258766 &>/dev/null
+    ;;
+(Linux*)
+    source functions-linux
+    
+    REPOS=(); PPAS=""; PKGS=""; SNAPS=();
+
+    # CLI Programs
+    PKGS=$PKGS" zsh git gawk curl xsel neovim"
+
+    # pyenv (1)
+    PKGS=$PKGS" make build-essential libssl-dev zlib1g-dev libbz2-dev \
+libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+xz-utils tk-dev"
+
+    # Snaps
+    SNAPS+=("pycharm-professional --classic")
+
+    # Virtualized Ubuntu needs: sudo apt-get install build-essential linux-headers-$(uname -r)
+    # Next add user to vboxsf:
+    # sudo usermod -G vboxsf -a $(whoami)
+    # https://www.ostechnix.com/check-linux-system-physical-virtual-machine/
+    ;|
+(*arisenU*)
+    PKGS=$PKGS" lm-sensors"
+    ;|
+(*Linux-x86*)
+    # if [ ! -d ~/.oh-my-zsh ]; then
+    #     echo $(urf_bold "Installing OMZ in seperate window...")
+    #     x-terminal-emulator -e ~/bin/hacky sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+    # fi
+
+    # REPOS (array cause multiple spaces in each repo)
+    # This is for older Ubuntu versions only
+    # REPOS+=("deb http://download.virtualbox.org/virtualbox/debian artful contrib");
+    # Standard "multiverse" Ubuntu repository Virtualbox
+    PKGS=$PKGS" virtualbox"
+
+    # PPAS
+    REPOS+=("ppa:linuxuprising/java"); PKGS=$PKGS" oracle-java10-installer"
+    # REPOS+=("ppa:numix/ppa"); PKGS=$PKGS" numix-icon-theme-circle"
+
+    # GUI Programs
+    PKGS=$PKGS" keepassx gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs chrome-gnome-shell gnome-tweaks"
+    
+    # Development		
+    PKGS=$PKGS" python3-pip"
+
+    # Publishing
+    PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra python-pygments pandoc"
+
+    PKGS_RM="evolution ksh"
+    if ! apt-key list | grep "B9F8 D658 297A F3EF C18D  5CDF A2F6 83C5 2980 AECF" >/dev/null; then
+        wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+    fi
+    ;|
+(Linux-arm*)
+    # CLI Programs
+    # avahi-daemon is installed by default
+    PKGS=$PKGS" emacs-nox usbmount"
+    ;|
+(Linux*)
+    installrepos $REPOS
+    installpkgs $PKGS
+    removepkgs $PKGS_RM
+
+    if urf_yNprompt "Update system? (Y/n)"; then
+	echo $(urf_bold "Ensuring Packages are up to date...")
+	# TODO: only run this if there are upgradable packages
+	sudo apt-get update && sudo apt-get upgrade -y;
+    fi
+    
+    # Remove texlive docs
+    if [ ! -z "$(dpkg -l | awk '{print $2}' | grep '^texlive.*-doc')" ]; then
+	sudo apt-get --purge remove -y ^texlive.\*-doc$
+    fi
+
+    unset REPOS PKGS PKGS_RM
+    
+    # (1) (pyenv requirements) [link](https://github.com/pyenv/pyenv/wiki/Common-build-problems)
+    if [ ! -d ~/.pyenv ]; then
+	echo $(urf_bold "Install: pyenv")
+	curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
+    fi
+    ;|
+(Linux-x86*)
+    SOFTWARE_DIR=~/Downloads
+    # Could simplify this, place the find inside installdeb if needed
+    installdeb "google-chrome-stable" $SOFTWARE_DIR/google-chrome-stable_current_amd64.deb
+    installdeb "steam-launcher" $SOFTWARE_DIR/steam_latest.deb
+    installjide "pycharm" $SOFTWARE_DIR bin/pycharm.sh
+    installjide "ideaIU" $SOFTWARE_DIR bin/idea.sh
+    installeclipse "eclipse-inst" $SOFTWARE_DIR eclipse-inst
+    unset SOFTWARE_DIR
+esac
+
+# Install Oh My ZSH without changing shell or running zsh, since we already have it set up.
+if [ ! -d ~/.oh-my-zsh ]; then
+    echo $(urf_bold "Ensuring Oh-My-ZSH is operational...")
+    wget -P /tmp/ https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh
+    sed -i.tmp 's:env zsh::g' /tmp/install.sh
+    sed -i.tmp 's:chsh -s .*$::g' /tmp/install.sh
+    sh /tmp/install.sh
+fi

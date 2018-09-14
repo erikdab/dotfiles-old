@@ -1,0 +1,501 @@
+#!/usr/bin/env zsh
+
+# Functions:
+# - urf_ln: link file from source to target
+# - urf_cprepo: copy file from repo to target
+# - urf_lnrepo: link file from repo to target
+# - urf_repofile: highest priority file in repositories
+# - urf_namedurl: named url for current hardware
+# - urf_sync: synchronize (backup/restore) specific prefs
+# - urf_yNprompt: easy yes no prompt with default answer
+# - urf_bold: echo msg with bold text $1
+# - urf_btitle: echo msg with bold title $1 and text $2
+# - urf_setup_whoami: setup system info
+# - urf_echo_whoami: echo msg with system info
+# - urf_sudocp: copy file from source to target with sudo writes
+# - urf_sudoecho: echo a text to a file with sudo
+# - urf_contains: does one string contain another
+# - urf_check_sanity: check if system is properly setup
+# - urf_check_hostname: setup hostname if not set before
+# - urf_set_hostname: set hostname
+# - urf_get_repos: get file repositories with priority
+# - urf_check_repos: setup file repositories with priority if not set before
+# - urf_set_repos: set file repositories with priority
+# - urf: alias to urfilez
+# - surf: alias to urfilez, but uses Defaults
+# - urf_arraywrite: write array to file
+# - urf_arrayread: read array from file
+
+# RUN at start (at all times)
+# - urf_setup_whoami
+
+urf_ln() {
+    if [ ! -L "$2" ] || [ "$(readlink "$2")" != "$1" ]; then
+	_source=${1//~/\~}
+	_target=${2//~/\~}
+	
+	echo "Symlinking: '$_source' -> '$_target'."
+
+	if [ -e "$2" ]; then
+	    if [ -L "$2" ]; then
+		echo $(urf_bold "[Symlink] '$_target' points to -> '$(readlink "$2")'")
+	    elif [ -d "$2" ]; then
+		echo $(urf_bold "[Dir] '$_target' contains: ")$(ls "$2")
+	    elif [ -f "$2" ]; then
+		echo $(urf_bold "[File] '$_target' contents: ")
+		head -3 "$2" | LC_ALL=C cut -c 1-240
+            fi
+	    if ! urf_yNprompt "Target Exists! Overwrite existing '$_target'? (y/N)"; then
+		echo $(urf_bold "Target Left Alone! Fix destination or Run again.")
+		return 1
+	    fi
+	fi
+	
+	# Create parent directories if required
+	mkdir -p "${2%/*}"
+	# Remove existing files if present
+	rm -rf "$2"
+	case $WHARDWARE in
+	(Linux*)
+            ln -Ffs "$1" "$2"
+            ;;
+	(Darwin*)
+            ln -Ffhs "$1" "$2"
+	esac
+	
+	unset _source _target
+    fi
+}
+
+urf_cprepo() {
+    # Check if file exists in storage
+    WHICH_FILE=$(urf_repofile $1)
+    if [ -z "$WHICH_FILE" ]; then
+	echo "Copy: File $1 does not exist in storage."
+	exit 2
+    elif [ ! -L "$2" ]; then
+	if [ -e "$2" ]; then
+	    echo "Copy: Replace file/dir with file/folder at: $1."
+	else
+	    echo "Copy: '$1' -> '$2'."
+	fi
+    fi
+    # Could integrate urf_lnrepo and urf_cprepo some time
+    # Copy file
+    case $3 in
+    (-sudo)
+        # Create parent directories if required
+        sudo mkdir -p "${2%/*}"
+        # Remove existing files if present
+        sudo rm -rf "$2"
+	sudo cp -rf "$WHICH_FILE" "$2"
+	;;
+    (*)
+        # Create parent directories if required
+        mkdir -p "${2%/*}"
+        # Remove existing files if present
+        rm -rf "$2"
+	cp -rf "$WHICH_FILE" "$2"
+	;;
+    esac
+}
+
+urf_lnrepo() {
+    # Check if file exists in storage
+    WHICH_FILE=$(urf_repofile $1)
+    if [ -z "$WHICH_FILE" ]; then
+	echo "[urf_lnrepo]: '$1' not found for current device!"
+	exit 2
+    else
+	urf_ln "$WHICH_FILE" "$2"
+    fi
+}
+
+urf_repofile() {
+    # Preferred more specific (more dashes)
+    # Delimiter: -
+    # example: Brewfile, Brewfile#Darwin, Brewfile#Darwin-macie
+
+    # Make an environment variable for $folder, which if unset, will default to this value
+    # I didn't use 'find' because then I can't $(urf_repofile emacs.d/init.el)
+
+    find_file() {
+	local which_file=""
+	local max_priority=-1
+	local directories=(~/dotfiles/config ~/Dropbox/Setup/config)
+	for directory in $directories; do
+	    if [ ! -d $directory ]; then
+		continue
+	    fi
+	    for file in $directory/"${1%%\#*}"*; do
+		# Extract hardware information from file + Create regex matcher
+		local whardware="${file#*\#}"
+		local whardware_re=".*${whardware:gs/-/.*}.*"
+		
+		# Count priority (more hardware sections means more priority)
+		local priority=0
+		if urf_contains $file "#"; then
+		    ((priority=1+$(awk -F"-" '{print NF-1}' <<< "${whardware}")))
+		fi
+
+		# Is compatible hardware && Has greater priority
+		if ( ! urf_contains $file "#" || [[ $WHARDWARE =~ $whardware_re ]]) && [ $priority -gt $max_priority ]; then
+		    which_file="$file"
+		    max_priority=$priority
+		fi
+	    done
+	done
+	echo "$which_file"
+    }
+
+    echo "$(find_file $1)"
+    unset -f find_file
+}
+
+urf_namedurl() {
+    local folder_=""
+    case $WHARDWARE in
+    (Linux-x86*)
+	case $1 in
+	(firefox)
+	    folder_=~/.mozilla/firefox
+	    ;;
+	(fonts)
+	    folder_=~/.local/share/fonts
+	    ;;
+	(keepassxc)
+	    folder_=~/.config/keepassxc
+	    ;;
+	(config)
+	    folder_=~/.config
+	    ;;
+	(urfilez)
+	    folder_=~/.config/urfilez
+	esac
+	;;
+    (Darwin*)
+	case $1 in
+	(firefox)
+	    folder_=~/"Library/Application Support/Firefox/Profiles"
+	    ;;
+	(fonts)
+	    folder_=~/Library/Fonts
+	    ;;
+	(iTerm2)
+	    folder_=~/Dropbox/Setup/apps/iTerm2
+	    ;;
+	(keepassxc)
+	    folder_=~/"Library/Application Support/keepassxc"
+	    ;;
+	(config)
+	    folder_=~/"Library/Application Support"
+	    ;;
+	(urfilez)
+	    folder_=~/"Library/Application Support/urfilez"
+	esac
+    esac
+
+    # DEFINED ----------------------------------------------------------------------
+    if [ ! -z $folder_ ]; then
+	echo $folder_
+	unset folder_
+	return 0
+    fi
+
+    # UNDEFINED --------------------------------------------------------------------
+    unset folder_
+
+    # REQUIRED
+    local required=(firefox fonts iterm)
+    for key in $required; do
+	if [ $1 = $key ]; then
+	    echo $(urf_bold "[wfolder] ERROR: '$1' should be defined!")
+	    exit 1
+	fi
+    done
+
+    # OPTIONAL, although it is weird the key was called
+    echo $(urf_bold "[wfolder] WARNING: '$1' not defined. Why is it requested?")
+}
+
+urf_sync() {
+    # How do I add apps to the dock? / Remove exising ones?
+
+    case $1 in
+    (-b|--backup)
+	pyenv versions --bare --skip-aliases | grep -v env | grep -v system > $(urf_repofile pyenv_versions)
+	;;
+    (-r|--restore)
+	while read pyenv_version; do
+	    pyenv install -s $pyenv_version
+	done < $(urf_repofile pyenv_versions)
+	;;
+    (*)
+	echo "Backup (-b|--backup) or restore (-r|--restore)?"
+	exit
+	;;
+    esac
+
+    case $WHARDWARE in
+    (Linux-x86*)
+	# Linux Desktop environment synchronization scripts
+	# If file doesn't exist, it isn't loaded
+	source sync-$WDE $1 2>/dev/null
+	;;
+    esac
+}
+
+# Works in zsh, not in bash, BASH variation in presetup.bash
+# Usage:
+# if urf_yNprompt "Qs? (Y/n)"; then
+# if urf_yNprompt "Qs? (y/N)"; then
+#     echo "Yes"
+# else
+#     echo "No"
+# fi
+urf_yNprompt() {
+    # $1: Message
+    read -r prompt_ans\?">> $1 "
+
+    if [ ! -z $prompt_ans ] && [ ! -z $prompt_ans ]; then
+	prompt_ans=$(python -c "print('$prompt_ans'.lower())" )
+    fi
+    local default_ans="y"
+    if [[ "$1" = *"(y/N)"* ]]; then
+	default_ans="n"
+    fi
+    if ([ $default_ans = "y" ] && [ -z $prompt_ans ]) || ([ $prompt_ans = "y" ]) &>/dev/null ; then
+        return 0
+    fi
+    return 1
+}
+
+urf_bold() {
+    BC='\e[1;96m' # Bold+Light Cyan
+    NBNC='\e[21;0m' # No Bold+No Color
+    printf "${BC}$1${NBNC}"
+}
+
+urf_btitle() {
+    if [ ! -z $2 ]; then
+	echo $(urf_bold $1):$2
+    fi
+}
+
+urf_setup_whoami() {
+    # Kernel (Darwin/Linux/etc)
+    export WKERNEL=$(uname)
+    # System Architecture (x86/arm/etc)
+    export WARCH=$(uname -m)
+
+    # Package manager
+    if type apt-get &> /dev/null; then
+	export WPKG=apt-get;
+    elif type brew &> /dev/null || [ $WKERNEL = "Darwin"]; then
+	export WPKG=brew;
+    elif type yum &> /dev/null; then
+	export WPKG=yum;
+    elif type dnf &> /dev/null; then
+	export WPKG=dnf;
+    fi
+
+    # Hey you know what.. we could place $WDE and $WDISTRO inside WKERNEL? Rename it to WHARDWARE
+    case $WKERNEL in
+    (Darwin)
+    ;;
+    (Linux)
+	# Desktop Environment (DE)
+	if urf_contains $XDG_CURRENT_DESKTOP:l gnome; then
+	    export WDE=gnome;
+	elif urf_contains $XDG_CURRENT_DESKTOP:l kde; then
+	    export WDE=kde;
+	fi
+
+	# TODO: might slow down terminal - look for alternative
+	local lsb_release=$(lsb_release -d)
+	if urf_contains $lsb_release:l "fedora"; then
+	    export WDISTRO=Fedora;
+	elif urf_contains $lsb_release:l "ubuntu"; then
+	    export WDISTRO=Ubuntu;
+	elif urf_contains $lsb_release:l "raspbian"; then
+	    export WDISTRO=Raspbian;
+	fi
+	;;
+    (*)
+	echo ($urf_bold "WKERNEL='$WKERNEL' not supported!")
+    esac
+
+    # Host name (could be function)
+    export WHOST="$(hostname)"
+
+    # Hardware Distinguisher! Very useful
+    export WHARDWARE=$WKERNEL-$WARCH-$WPKG-$WDE-$WDISTRO-$WHOST
+}
+
+urf_echo_whoami() {
+    # TODO: Don't print those which are empty
+    local elements=($(urf_btitle Kernel $WKERNEL) $(urf_btitle Arch $WARCH) $(urf_btitle Pkg $WPKG) $(urf_btitle DE $WDE) $(urf_btitle Distro $WDISTRO) $(urf_btitle Host $WHOST))
+    echo ${(j., .)elements}
+    # Maybe faster, test if slow
+    # echo $(urf_bold "Kernel: ")$WKERNEL$(urf_bold ", Arch: ")$WARCH$(urf_bold ", Pkg: ")$WPKG$(urf_bold ", DE: ")$WDE$(urf_bold ", Distro: ")$WDISTRO$(urf_bold ", Host: ")$WHOST
+}
+
+urf_sudocp() {
+    # 1: copy this file
+    # 2: to this file
+    if [ $3 = "-a" ]; then
+	cat "$1" | sudo tee -a "$2" >> /dev/null
+    else
+	cat "$1" | sudo tee "$2" >> /dev/null
+    fi
+}
+
+urf_sudoecho() {
+    # 1: save this text
+    # 2: to this file
+    if [ "$3" = "-a" ]; then
+	echo "$1" | sudo tee -a "$2" >> /dev/null
+    else
+	echo "$1" | sudo tee "$2" >> /dev/null
+    fi
+}
+
+urf_contains() {
+    string="$1"
+    substring="$2"
+    if test "${string#*$substring}" != "$string"
+    then
+        return 0    # $substring is in $string
+    else
+        return 1    # $substring is not in $string
+    fi
+}
+
+urf_check_sanity() {
+    local required_dirs=(~/Dropbox/Setup/bin/setup)
+    for dir in $required_dirs; do
+	if [ ! -d $dir ]; then
+	    echo $(urf_bold "Missing directory: $dir")
+	    return 1
+	fi
+    done
+
+    # Add install scripts to path if first install (normally in .zshenv)
+    # THIS is only useful for installation
+    if ! urf_contains "$PATH" ~/Dropbox/Setup/bin &&
+	    ! urf_contains "$PATH" ~/Dropbox/Setup/bin/setup; then
+	export PATH=~/Dropbox/Setup/bin:~/Dropbox/Setup/bin/setup:$PATH
+    fi
+    # Scripts folder
+    ln -fs ~/Dropbox/Setup/bin ~/
+
+    # Config folder
+    local config_url=$(urf_namedurl urfilez)
+    if [ ! -f $config_url ]; then
+	    mkdir -p $config_url
+    fi
+
+    # TODO: maybe not required
+    #cd ~/bin/setup
+
+    return 0
+}
+
+urf_check_hostname() {
+    local config_url=$(urf_namedurl urfilez)
+    
+    local hostname_url=$config_url/hostname
+    if [ ! -f $hostname_url ]; then
+        urf_set_hostname
+    fi
+}
+
+urf_set_hostname() {
+    local config_url=$(urf_namedurl urfilez)
+    #if [ ! -d $config_url ]; then; exit 1; fi
+
+    local hostname_url=$config_url/hostname
+    echo -n "Enter desired hostname: "
+    read hostname
+    echo $hostname > $hostname_url
+    case $WKERNEL in
+    (Darwin)
+        # Set computer name (as done via System Preferences → Sharing)
+        sudo scutil --set ComputerName $hostname
+        sudo scutil --set HostName $hostname
+        sudo scutil --set LocalHostName $hostname
+        sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string $hostname
+        ;;
+    (Linux)
+        urf_sudoecho $hostname /etc/hostname
+        # TODO: modify /etc/hosts too (if old hostname is there!)
+        ;;
+    esac
+
+    # Read current hostname ask see if need to restart
+    export WHOST="$(hostname)"
+
+    if [ $hostname != $WHOST ]; then
+        echo $(urf_bold "Rebooting machine to update hostname for rest of installation")
+        read -s -k '?Press any key to continue.'
+        sudo shutdown -r now
+    fi
+}
+
+urf_get_repos() {
+    local config_url=$(urf_namedurl urfilez)
+    if [ ! -f $config_url ]; then; exit 1; fi
+    
+    local repos_url=$config_url/repos
+    echo "Current repos:"; cat $repos_url;
+}
+
+urf_check_repos() {
+    local config_url=$(urf_namedurl urfilez)
+    if [ ! -f $config_url ]; then; exit 1; fi
+    
+    local repos_url=$config_url/repos
+    if [ ! -f $repos_url ]; then
+        urf_set_repos
+    fi
+}
+
+urf_set_repos() {
+    local config_url=$(urf_namedurl urfilez)
+    
+    local repos_url=$config_url/repos
+	echo -n "Enter desired folder repositories from highest to lowest priority (one per line): "
+    cat > $repos_url
+
+    echo "It is recommended to run urf (urfilez run) now to update the files from the new repositories."
+}
+
+urf_arraywrite() {
+    # 1: filename
+    # 2: an array to write
+    for entry in $@; do
+	if [ $entry != $1 ]; then
+	    echo $entry
+	fi
+    done > $1
+}
+
+urf_arrayread() {
+    # 1: filename
+    read_array=()
+    for line in "${(@f)"$(<$1)"}"; do
+	read_array+=("$line")
+    done
+    echo $read_array
+}
+
+urf() {
+    urfilez run
+}
+
+surf() {
+    urfilez run
+}
+
+# RUN at start (at all times) - has no right to bug out, should always work
+urf_setup_whoami

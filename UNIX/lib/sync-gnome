@@ -1,0 +1,62 @@
+#!/usr/bin/env zsh
+
+# Sync Gnome dconf settings
+urf_sync_dconf() {
+    # Directories end with /
+    # $1: -b/-r
+    # $2: filename
+    # $3: dconf group/val
+    ISVALUE=true
+    if [[ $3 == *"/" ]]; then
+	ISVALUE=false
+    fi
+    DFILE=$(urf_repofile dconf/$2.dconf)
+    if [ -z $DFILE ]; then
+	exit 2
+    fi
+    
+    case $1 in
+    (-b|--backup)
+	if $ISVALUE; then
+	    dconf read $3 > $DFILE
+	else
+	    dconf dump $3 > $DFILE
+	fi
+	;;
+    (-r|--restore)
+	if $ISVALUE; then
+	    dconf write $3 "$(cat $DFILE)"
+	else
+	    dconf load $3 < $DFILE
+	fi
+    esac
+}
+
+# DIRS
+# TODO: check if ok.
+# urf_sync_dconf $1 "color" /org/gnome/settings-daemon/plugins/color/
+# TERM_PROFILE="$(dconf list /org/gnome/terminal/legacy/profiles:/ | grep : | awk 'NR==1')"
+# urf_sync_dconf $1 "gnome-terminal" /org/gnome/terminal/legacy/profiles:/${TERM_PROFILE}
+
+# urf_sync_dconf $1 "nautilus_preferences" /org/gnome/nautilus/preferences/
+# urf_sync_dconf $1 "nautilus_compression" /org/gnome/nautilus/compression/
+# urf_sync_dconf $1 "nautilus_list-view" /org/gnome/nautilus/list-view/
+
+# urf_sync_dconf $1 "input-sources" /org/gnome/desktop/input-sources/
+# urf_sync_dconf $1 "interface" /org/gnome/desktop/interface/
+# urf_sync_dconf $1 "wm_prefs" /org/gnome/desktop/wm/preferences/
+# urf_sync_dconf $1 "wm_keys" /org/gnome/desktop/wm/keybindings/
+
+# urf_sync_dconf $1 "ext_dash-to-dock" /org/gnome/shell/extensions/dash-to-dock/
+# urf_sync_dconf $1 "ext_desk-changer" /org/gnome/shell/extensions/desk-changer/
+# urf_sync_dconf $1 "ext_desktop-scroller" /org/gnome/shell/extensions/desktop-scroller/
+
+# # VALUES
+# urf_sync_dconf $1 "keys_www" /org/gnome/settings-daemon/plugins/media-keys/www
+# urf_sync_dconf $1 "keys_home" /org/gnome/settings-daemon/plugins/media-keys/home
+# urf_sync_dconf $1 "favorite-apps" /org/gnome/shell/favorite-apps
+# urf_sync_dconf $1 "desktop-icons" /org/gnome/desktop/background/show-desktop-icons
+# urf_sync_dconf $1 "cpu-colors" /org/gnome/gnome-system-monitor/cpu-colors
+
+# Other applications
+urf_sync_dconf $1 "tilix" /com/gexperts/Tilix/

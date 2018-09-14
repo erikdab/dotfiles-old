@@ -1,0 +1,4 @@
+#!/bin/sh
+# pass a command to this script and it will execute it in another shell
+"$@"
+exec "$SHELL"
