@@ -88,7 +88,8 @@ installdesktop() {
     for desktop in $1/*.desktop; do
 	mkdir -p $2
 	local desktop_local=$2/${desktop##*/}
-	if [ ! -f $desktop_local ]; then
+	# New or updated desktop file
+	if [ ! -f $desktop_local ] || [ $desktop -nt $desktop_local ]; then
 	    echo "Copied desktop file to $3: ${desktop##*/}"
             cp $desktop $desktop_local
 	    chmod +x $desktop_local
