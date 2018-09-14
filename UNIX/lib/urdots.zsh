@@ -10,8 +10,9 @@ if ! urf_check_sanity; then; exit 1; fi
 usage_msg() {
     echo "Usage:"
     echo "\trun - PULL Remote Repos & Run Setup (default)"
-    #echo "\tpull - PULL Remote Repos"
-    #echo "\tpush - PUSH Local Repos"
+    # echo "\tpull - PULL from Git"
+    # echo "\tsync - PULL+PUSH from/to Git"
+    # echo "\tstatus - Git status"
     echo "\thostname [get/set] - get/set your hostname"
     #echo "\trepos [get/set] - get/set your repositories"
 }

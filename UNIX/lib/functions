@@ -372,7 +372,7 @@ urf_contains() {
 }
 
 urf_check_sanity() {
-    local required_dirs=(~/Dropbox/Setup/bin/setup)
+    local required_dirs=(~/Dropbox/Setup/config)
     for dir in $required_dirs; do
 	if [ ! -d $dir ]; then
 	    echo $(urf_bold "Missing directory: $dir")
@@ -382,12 +382,12 @@ urf_check_sanity() {
 
     # Add install scripts to path if first install (normally in .zshenv)
     # THIS is only useful for installation
-    if ! urf_contains "$PATH" ~/Dropbox/Setup/bin &&
-	    ! urf_contains "$PATH" ~/Dropbox/Setup/bin/setup; then
-	export PATH=~/Dropbox/Setup/bin:~/Dropbox/Setup/bin/setup:$PATH
-    fi
+    # if ! urf_contains "$PATH" ~/Dropbox/Setup/bin &&
+    # 	    ! urf_contains "$PATH" ~/Dropbox/Setup/bin/setup; then
+    # 	export PATH=~/Dropbox/Setup/bin:~/Dropbox/Setup/bin/setup:$PATH
+    # fi
     # Scripts folder
-    ln -fs ~/Dropbox/Setup/bin ~/
+    #ln -fs ~/.config/dotfiles/UNIX/bin ~/
 
     # Config folder
     local config_url=$(urf_namedurl urfilez)
@@ -402,9 +402,7 @@ urf_check_sanity() {
 }
 
 urf_check_hostname() {
-    local config_url=$(urf_namedurl urfilez)
-    
-    local hostname_url=$config_url/hostname
+    local hostname_url=$(urf_namedurl urfilez)/hostname
     if [ ! -f $hostname_url ]; then
         urf_set_hostname
     fi

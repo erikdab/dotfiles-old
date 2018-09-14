@@ -67,7 +67,7 @@ xz-utils tk-dev"
     # REPOS+=("ppa:numix/ppa"); PKGS=$PKGS" numix-icon-theme-circle"
 
     # GUI Programs
-    PKGS=$PKGS" keepassx gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs chrome-gnome-shell gnome-tweaks"
+    PKGS=$PKGS" keepassxc gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs chrome-gnome-shell gnome-tweaks"
     
     # Development		
     PKGS=$PKGS" python3-pip libsecret-1-0 libsecret-1-dev"
@@ -126,5 +126,6 @@ if [ ! -d ~/.oh-my-zsh ]; then
     wget -P /tmp/ https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh
     sed -i.tmp 's:env zsh::g' /tmp/install.sh
     sed -i.tmp 's:chsh -s .*$::g' /tmp/install.sh
-    sh /tmp/install.sh
+    sh /tmp/install.sh   
+    chsh -s $(which zsh) $(whoami)
 fi
