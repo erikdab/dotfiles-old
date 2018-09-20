@@ -2,7 +2,8 @@
 echo $(urf_bold "Slynking data...")
 
 # Emacs
-urf_lnrepo emacs.d ~/.emacs.d
+git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
+urf_lnrepo spacemacs ~/.spacemacs
 # Neovim (works in macOS?)
 urf_lnrepo init.vim ~/.config/nvim/init.vim
 # Git

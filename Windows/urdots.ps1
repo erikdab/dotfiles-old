@@ -48,7 +48,7 @@ Set-ExecutionPolicy RemoteSigned
 # Configurations
 Update-RepoLink Microsoft.PowerShell_profile.ps1 $HOME\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
 Update-RepoLink cmder_config C:\tools\cmder\config
-Update-RepoLink "emacs.d" $HOME\.emacs.d
+git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
 Update-RepoLink spacemacs $HOME\.spacemacs
 Update-RepoLink keepassxc.ini $env:LOCALAPPDATA\keepassxc\keepassxc.ini
 
