@@ -68,6 +68,9 @@ xz-utils tk-dev"
 
     # GUI Programs
     PKGS=$PKGS" keepassxc gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs chrome-gnome-shell gnome-tweaks"
+
+    # GSConnect dependencies
+    PKGS=$PKGS" gir1.2-gdata-0.0 sshfs" 
     
     # Development		
     PKGS=$PKGS" python3-pip libsecret-1-0 libsecret-1-dev"
