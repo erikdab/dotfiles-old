@@ -10,6 +10,7 @@
 # - linkfiles: link files from one folder to another
 # - installrepos: install an array of apt-get or PPA repositories
 # - installpkgs: install pkgs (list in a string) from apt-get/PPAs
+# - installsnaps: install snaps (array of strings)
 # - removepkgs: remove pkgs (list in a string)
 # - listrepos: list currently setup repositories
 # - listppas: list currently setup ppas
@@ -140,6 +141,13 @@ installpkgs() {
 	    sudo apt autoremove -y
 	    break
 	fi
+    done
+}
+
+installsnaps() {
+    # @: array of snaps to install
+    for snap in $@; do
+        sudo snap install $=snap
     done
 }
 

@@ -40,7 +40,7 @@ libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
 xz-utils tk-dev"
 
     # Snaps
-    SNAPS+=("pycharm-professional --classic")
+    SNAPS+=("pycharm-professional --classic" "intellij-idea-community --classic" "communitheme")
 
     # Virtualized Ubuntu needs: sudo apt-get install build-essential linux-headers-$(uname -r)
     # Next add user to vboxsf:
@@ -91,6 +91,7 @@ xz-utils tk-dev"
 (Linux*)
     installrepos $REPOS
     installpkgs $PKGS
+    installsnaps $SNAPS
     removepkgs $PKGS_RM
 
     if urf_yNprompt "Update system? (Y/n)"; then
