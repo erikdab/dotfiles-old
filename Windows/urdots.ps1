@@ -31,7 +31,7 @@ If (-Not (Test-CommandExists choco)) {
 $confirmation = Read-Host "Install & Update Chocolatey packages? (y/n)"
 if ($confirmation -eq 'y') {
     choco upgrade -y all
-    choco install -y ~/Dropbox/Setup/config/packages.config
+    choco install -y $HOME\Dropbox\Setup\config\packages.config
 }
 
 # Ubuntu on Windows
@@ -48,7 +48,10 @@ Set-ExecutionPolicy RemoteSigned
 # Configurations
 Update-RepoLink Microsoft.PowerShell_profile.ps1 $HOME\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
 Update-RepoLink cmder_config C:\tools\cmder\config
-git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
+# Clone spacemacs emacs.d folder
+If (-Not (Test-Path $HOME\.emacs.d)) {
+    git clone https://github.com/syl20bnr/spacemacs $HOME\.emacs.d
+}
 Update-RepoLink spacemacs $HOME\.spacemacs
 Update-RepoLink keepassxc.ini $env:LOCALAPPDATA\keepassxc\keepassxc.ini
 
@@ -58,7 +61,6 @@ Update-RepoLink "userChrome.css#Windows" "$($firefox_folder)\chrome\userChrome.c
 
 # Links
 New-Item -Path $HOME\org -ItemType SymbolicLink -Value $HOME\Dropbox\org -Force
-New-Item -Path $HOME\bin -ItemType SymbolicLink -Value $HOME\Dropbox\Setup\bin -Force
 
 # Startup
 # In future make this a link not a copy
