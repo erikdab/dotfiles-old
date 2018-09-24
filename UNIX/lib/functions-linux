@@ -11,6 +11,7 @@
 # - installrepos: install an array of apt-get or PPA repositories
 # - installpkgs: install pkgs (list in a string) from apt-get/PPAs
 # - installsnaps: install snaps (array of strings)
+# - installgroups: install a group of software / pkgs / etc.
 # - removepkgs: remove pkgs (list in a string)
 # - listrepos: list currently setup repositories
 # - listppas: list currently setup ppas
@@ -23,8 +24,8 @@ isinstalled() {
 requirepkg() {
     # 1: package file name
     if ! isinstalled $1; then
-	echo "Install: $1"
-	sudo apt-get install -y "$1"
+	      echo "Install: $1"
+	      sudo apt-get install -y "$1"
     fi
 }
 
@@ -32,12 +33,12 @@ installdeb() {
     # 1: package file name
     # 2: deb file to install
     if ! isinstalled $1; then
-	if [ -f "$2" ]; then
-	    echo "Install: $1"
-	    sudo apt-get install -f "$2"
-	else
-	    echo "Optional: $1, not in Downloads"
-	fi
+	      if [ -f "$2" ]; then
+	          echo "Install: $1"
+	          sudo apt-get install -f "$2"
+	      else
+	          echo "Optional: $1, not in Downloads"
+	      fi
     fi
 }
 
@@ -46,20 +47,20 @@ installjide() {
     # 2: software_dir
     # 3: script to run after installation (from inside install directory)
     if [ ! -d /opt/${1} ]; then
-	local JIDE_FILE="$(find ${2} -name "${1}-*.tar.gz")"
-	if [ -f "$JIDE_FILE" ]; then
-	    echo "Install: $1"
-	    sudo mkdir -p /opt/${1}
-	    sudo mkdir -p /tmp/${1}
-	    sudo tar xf $JIDE_FILE -C /tmp/${1}
-	    sudo mv /tmp/${1}/*/* /opt/${1}/
-	    sudo rm -rf /tmp/${1}
-	    if [ ! -z "$3" ]; then
-		x-terminal-emulator -e ~/bin/setup/hackyrun sh /opt/${1}/${3}
-	    fi
-	else
-	    echo "Optional: $1, not installed - not in Downloads"
-	fi
+	      local JIDE_FILE="$(find ${2} -name "${1}-*.tar.gz")"
+	      if [ -f "$JIDE_FILE" ]; then
+	          echo "Install: $1"
+	          sudo mkdir -p /opt/${1}
+	          sudo mkdir -p /tmp/${1}
+	          sudo tar xf $JIDE_FILE -C /tmp/${1}
+	          sudo mv /tmp/${1}/*/* /opt/${1}/
+	          sudo rm -rf /tmp/${1}
+	          if [ ! -z "$3" ]; then
+		            x-terminal-emulator -e ~/bin/setup/hackyrun sh /opt/${1}/${3}
+	          fi
+	      else
+	          echo "Optional: $1, not installed - not in Downloads"
+	      fi
     fi
 }
 
@@ -68,17 +69,17 @@ installeclipse() {
     # 2: software_dir
     # 3: script to run after installation (from inside install directory)
     if [ ! -d ~/eclipse ]; then
-	local JIDE_FILE="$(find ${2} -name "${1}-*.tar.gz")"
-	if [ -f "$JIDE_FILE" ]; then
-	    echo "Install: $1"
-	    sudo mkdir -p /tmp/${1}
-	    sudo tar xf $JIDE_FILE -C /tmp/${1}
-	    if [ ! -z "$3" ]; then
-		x-terminal-emulator -e ~/bin/setup/hackyrun /tmp/${1}/*/${3}
-	    fi
-	else
-	    echo "Optional: $1, not installed - not in Downloads"
-	fi
+	      local JIDE_FILE="$(find ${2} -name "${1}-*.tar.gz")"
+	      if [ -f "$JIDE_FILE" ]; then
+	          echo "Install: $1"
+	          sudo mkdir -p /tmp/${1}
+	          sudo tar xf $JIDE_FILE -C /tmp/${1}
+	          if [ ! -z "$3" ]; then
+		            x-terminal-emulator -e ~/bin/setup/hackyrun /tmp/${1}/*/${3}
+	          fi
+	      else
+	          echo "Optional: $1, not installed - not in Downloads"
+	      fi
     fi
 }
 
@@ -87,14 +88,14 @@ installdesktop() {
     # 2: desktop files destination
     # 3: destination name
     for desktop in $1/*.desktop; do
-	mkdir -p $2
-	local desktop_local=$2/${desktop##*/}
-	# New or updated desktop file
-	if [ ! -f $desktop_local ] || [ $desktop -nt $desktop_local ]; then
-	    echo "Copied desktop file to $3: ${desktop##*/}"
+	      mkdir -p $2
+	      local desktop_local=$2/${desktop##*/}
+	      # New or updated desktop file
+	      if [ ! -f $desktop_local ] || [ $desktop -nt $desktop_local ]; then
+	          echo "Copied desktop file to $3: ${desktop##*/}"
             cp $desktop $desktop_local
-	    chmod +x $desktop_local
-	fi
+	          chmod +x $desktop_local
+	      fi
     done
 }
 
@@ -107,9 +108,9 @@ linkfiles() {
     local fname=$3
     for file in $fsource/*; do
         mkdir -p $fdest
-	local file_local=$fsource/${file##*/}
+	      local file_local=$fsource/${file##*/}
         if [ ! -f $file_local ]; then
-	    echo "Copied file to $fname: ${file##*/}"
+	          echo "Copied file to $fname: ${file##*/}"
             ln -fs $file $file_local
         fi
     done
@@ -119,28 +120,45 @@ installrepos() {
     # @: repos to install (array)
     local repo_added=false
     for repo in $@; do
-	if [ -z "$(list_repos | grep "$repo")" ]; then
-	    echo "Adding repository via add-apt-repository: $repo"
-	    sudo add-apt-repository "$repo"
-	    repo_added=true
-	fi
+	      if [ -z "$(list_repos | grep "$repo")" ]; then
+	          echo "Adding repository via add-apt-repository: $repo"
+	          sudo add-apt-repository "$repo"
+	          repo_added=true
+	      fi
     done
     if $repo_added; then
-	sudo apt update; sudo apt upgrade -y;
+	      sudo apt update; sudo apt upgrade -y;
     fi
+}
+
+installgroups() {
+    # @: groups to install (array)
+    local groups_file=$(urf_repofile groups)
+    local groups=()
+    if [ -n $groups_file ]; then
+        urf_arrayread $groups_file
+        groups=$read_array
+    fi
+    for group in $@; do
+        # Choose groups in the REPO, to enable automatic installation
+        if ([ -n $groups_file ] && urf_containsarray $groups $group) || \
+               ([ -z $groups_file ] && urf_yNprompt "Install group: $group? (Y/n)"); then
+            source "groups/$group.zsh"
+        fi
+    done
 }
 
 installpkgs() {
     # @: string of pkgs to install
     for pkg in ${=@}; do
-	if ! isinstalled $pkg; then
-	    echo "Installing new software via apt-get (trigger: $pkg)"
-	    sudo apt update
-	    sudo apt upgrade -y
-	    sudo apt install -y $(echo $@)
-	    sudo apt autoremove -y
-	    break
-	fi
+	      if ! isinstalled $pkg; then
+	          echo "Installing new software via apt-get (trigger: $pkg)"
+	          sudo apt update
+	          sudo apt upgrade -y
+	          sudo apt install -y $(echo $@)
+	          sudo apt autoremove -y
+	          break
+	      fi
     done
 }
 
@@ -154,11 +172,11 @@ installsnaps() {
 removepkgs() {
     # @: string of pkgs to remove
     for pkg in ${=@}; do
-	if isinstalled $pkg; then
-	    echo "Removing software via apt-get (trigger: $pkg)"
-	    sudo apt remove -y $(echo $@)
-	    break
-	fi
+	      if isinstalled $pkg; then
+	          echo "Removing software via apt-get (trigger: $pkg)"
+	          sudo apt remove -y $(echo $@)
+	          break
+	      fi
     done
 }
 
@@ -171,8 +189,8 @@ isalternative() {
 
 list_repos() {
     grep -E '^deb\s' /etc/apt/sources.list /etc/apt/sources.list.d/*.list |\
-	cut -f2- -d: |\
-	sed -re 's#.*?http://ppa\.launchpad\.net/([^/]+)/([^/]+)(.*?)$#ppa:\1/\2#g'
+	      cut -f2- -d: |\
+	      sed -re 's#.*?http://ppa\.launchpad\.net/([^/]+)/([^/]+)(.*?)$#ppa:\1/\2#g'
 }
 
 list_ppas() {

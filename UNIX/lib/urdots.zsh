@@ -43,6 +43,7 @@ case $1 in
 (Linux-x86*)
 		echo "  Login: to Google Chrome to sync extensions"
 		echo "  Locale: set English (US), Keyboard: set English (US) and Polish"
+    echo "  Keyboard: Set caps to be ALSO Ctrl & switch languages to Win+Space"
 		;;
 	    (Darwin*)
 		echo "  Launchpad: Place Unused apps in one folder"
