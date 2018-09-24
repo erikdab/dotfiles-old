@@ -137,7 +137,7 @@ installgroups() {
     local groups=()
     if [ -n $groups_file ]; then
         urf_arrayread $groups_file
-        groups=$read_array
+        groups+=$read_array
     fi
     for group in $@; do
         # Choose groups in the REPO, to enable automatic installation

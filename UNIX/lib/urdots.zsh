@@ -77,3 +77,6 @@ case $1 in
     (*)
 	usage_msg
 esac
+# Setup my packages as layers (like in emacs):
+# - Global layer - packages without any dependencies, top-level
+# - seperate layers for more complicated setups, like dotnetcore, docker, virtualbox, pyenv, etc.

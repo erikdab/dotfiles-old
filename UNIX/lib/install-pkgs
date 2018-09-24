@@ -85,7 +85,7 @@ xz-utils tk-dev"
             wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
         fi
 
-        GROUPS+=("dotnetcore" "haha")
+        GROUPS+=("dotnetcore" "docker-ce")
         ;|
 (Linux-arm*)
         # CLI Programs

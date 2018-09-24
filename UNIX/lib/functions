@@ -491,7 +491,6 @@ urf_arrayread() {
     for line in "${(@f)"$(<$1)"}"; do
 	      read_array+=("$line")
     done
-    echo $read_array
 }
 
 urf() {
