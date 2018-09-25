@@ -24,6 +24,7 @@ if ! isinstalled "docker-ce"; then
     # Install Docker
     sudo apt install docker-ce
 
+    # Link: https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
     if urf_yNprompt "Install docker to a non-standard location? (y/N)"; then
         echo -n "New docker install location: "
         read docker_location
