@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 
+# TODO: Add SNIPPETS! for functions!
 # Functions:
 # - urf_ln: link file from source to target
 # - urf_cprepo: copy file from repo to target
@@ -13,6 +14,8 @@
 # - urf_setup_whoami: setup system info
 # - urf_echo_whoami: echo msg with system info
 # - urf_sudocp: copy file from source to target with sudo writes
+# - urf_safemv: safe mv from one location to another using rsync
+# - urf_sudosafemv: safe mv from one location to another using rsync (sudo)
 # - urf_sudoecho: echo a text to a file with sudo
 # - urf_contains: does one string contain another
 # - urf_containsarray: does array contain string
@@ -349,6 +352,26 @@ urf_sudocp() {
     else
 	      cat "$1" | sudo tee "$2" >> /dev/null
     fi
+}
+
+urf_safemv() {
+    # $1: source
+    # $2: destination
+    # Rsync twice to make absolute sure it is properly copied
+    rsync -aAXP "$1" "$2"
+    rsync -aAXP "$1" "$2"
+    # Then remove original location
+    rm -r "$1"
+}
+
+urf_sudosafemv() {
+    # $1: source
+    # $2: destination
+    # Rsync twice to make absolute sure it is properly copied
+    sudo rsync -aAXP "$1/" "$2"
+    sudo rsync -aAXP "$1/" "$2"
+    # Then remove original location
+    sudo rm -r "$1"
 }
 
 urf_sudoecho() {
