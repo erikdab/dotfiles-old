@@ -29,6 +29,7 @@
 # - surf: alias to urfilez, but uses Defaults
 # - urf_arraywrite: write array to file
 # - urf_arrayread: read array from file
+# - urf_arrayprint: print an array to stdout
 
 # RUN at start (at all times)
 # - urf_setup_whoami
@@ -515,6 +516,12 @@ urf_arrayread() {
 	      read_array+=("$line")
     done
 }
+
+urf_arrayprint() {
+    local array_to_print=$@
+    printf '%s\n' "${array_to_print[@]}"
+}
+
 
 urf() {
     urfilez run

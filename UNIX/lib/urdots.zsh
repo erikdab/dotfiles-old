@@ -14,68 +14,88 @@ usage_msg() {
     # echo "\tsync - PULL+PUSH from/to Git"
     # echo "\tstatus - Git status"
     echo "\thostname [get/set] - get/set your hostname"
+    if urf_contains $WHARDWARE Linux; then
+        echo "\tlayers [new/list] - new layer/list your layers"
+    fi
     #echo "\trepos [get/set] - get/set your repositories"
 }
 
 case $1 in
-    (run)
-	urf_check_hostname
-	#urf_check_repos
-	urf_echo_whoami
+(run)
+	  urf_check_hostname
+	  #urf_check_repos
+	  urf_echo_whoami
 
-	# INSTALLATION -------------------------------------------------------------
-	source install-pkgs
-	source install-files
-	source install-prefs
+	  # INSTALLATION -------------------------------------------------------------
+	  source install-pkgs
+	  source install-files
+	  source install-prefs
 
-	# NOTES --------------------------------------------------------------------
+	  # NOTES --------------------------------------------------------------------
 
-	# This could be placed in a file in the config repo
-	echo "DONE! \(^-^)/ \nKindly remember to:"
-	case $WHARDWARE in
-	    (*x86*)
-		echo "  Visual Paradigm - PWR version. Activate using student email. Link: "
-		echo "    $(urf_bold https://ap.visual-paradigm.com/institute-of-informatics/license.jsp)"
-		;|
+	  # This could be placed in a file in the config repo
+	  echo "DONE! \(^-^)/ \nKindly remember to:"
+	  case $WHARDWARE in
+	  (*x86*)
+		    echo "  Visual Paradigm - PWR version. Activate using student email. Link: "
+		    echo "    $(urf_bold https://ap.visual-paradigm.com/institute-of-informatics/license.jsp)"
+		    ;|
 (*Ubuntu*)
-		echo "  Select your wallpaper, sign in to Gnome Online Accounts - Google"
-		;|
+		    echo "  Select your wallpaper, sign in to Gnome Online Accounts - Google"
+		    ;|
 (Linux-x86*)
-		echo "  Login: to Google Chrome to sync extensions"
-		echo "  Locale: set English (US), Keyboard: set English (US) and Polish"
-    echo "  Keyboard: Set caps to be ALSO Ctrl & switch languages to Win+Space"
-		;;
-	    (Darwin*)
-		echo "  Launchpad: Place Unused apps in one folder"
-		;;
-	esac
-	;;
-    (hostname)
-	case $2 in
-	    (set)
-		urf_set_hostname
-		;;
-	    (get)
-		hostname
-		;;
-	    (*)
-		usage_msg
-	esac
-	;;
-    # (repos)
-    #    case $2 in
-    #    (set)
-    #        urf_set_repos
-    #        ;;
-    #    (get)
-    #        urf_get_repos
-    #        ;;
-    #    (*)
-    #        usage_msg
-    #    esac
-    #    ;;
-    (*)
-	usage_msg
+		    echo "  Login: to Google Chrome to sync extensions"
+		    echo "  Locale: set English (US), Keyboard: set English (US) and Polish"
+        echo "  Keyboard: Set caps to be ALSO Ctrl & switch languages to Win+Space"
+		    ;;
+	  (Darwin*)
+		    echo "  Launchpad: Place Unused apps in one folder"
+		    ;;
+	  esac
+	  ;;
+(hostname)
+	  case $2 in
+	  (set)
+		    urf_set_hostname
+		    ;;
+	  (get)
+		    hostname
+		    ;;
+	  (*)
+		    usage_msg
+	  esac
+	  ;;
+(layers)
+    if ! urf_contains $WHARDWARE Linux; then
+        usage_msg
+        return
+    fi
+    source functions-linux
+	  case $2 in
+	  (new)
+		    new_layer $3
+		    ;;
+	  (list)
+        print_layers
+		    ;;
+	  (*)
+		    usage_msg
+    esac
+    ;;
+# (repos)
+#    case $2 in
+#    (set)
+#        urf_set_repos
+#        ;;
+#    (get)
+#        urf_get_repos
+#        ;;
+#    (*)
+#        usage_msg
+#    esac
+#    ;;
+(*)
+	  usage_msg
 esac
 # Setup my packages as layers (like in emacs):
 # - Global layer - packages without any dependencies, top-level

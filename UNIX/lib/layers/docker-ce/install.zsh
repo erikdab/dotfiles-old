@@ -1,28 +1,21 @@
 #!/usr/bin/env zsh
-# Links:
-# - docker Ubuntu 18.04: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04
-# Each group can have some management features, like "move drive", etc.
+# Layer install script, please define: isinstalled, preinstall and install
 docker_running() {
     echo "$(ps aux | grep -i docker | grep -v grep)"
 }
+
+# Check if layer is installed here: return 0 if true, 1 if false
 if ! isinstalled "docker-ce"; then
-    local group_title="Installing $group"
-    echo $(urf_bold $group_title)
+    PKGS=$PKGS" apt-transport-https ca-certificates curl software properties-common"
+    installall
 
-    sudo apt update
-    # Install dependencies
-    sudo apt install apt-transport-https ca-certificates curl software-properties-common
-    # Add GPG key
+    # Add GPG key (Make this cross distro compatible)
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    # Add repo
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
 
-    sudo apt update
-    # Check policy
-    # apt-cache policy docker-ce
-
-    # Install Docker
-    sudo apt install docker-ce
+    # Add repo and pkg
+    REPOS+=("deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable")
+    PKGS=$PKGS" docker-ce"
+    installall
 
     # Link: https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
     if urf_yNprompt "Install docker to a non-standard location? (y/N)"; then

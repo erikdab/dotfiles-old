@@ -2,6 +2,7 @@
 
 # Functions (apt-get)
 # - isinstalled: is a package installed
+# - isinstalled_snap: is a snap installed
 # - requirepkg: make sure a package is installed
 # - installdeb: install a .deb file
 # - installjide: install a Jetbrains IDE from a .tar.gz
@@ -11,14 +12,26 @@
 # - installrepos: install an array of apt-get or PPA repositories
 # - installpkgs: install pkgs (list in a string) from apt-get/PPAs
 # - installsnaps: install snaps (array of strings)
-# - install_layers: install a group of software / pkgs / etc.
 # - removepkgs: remove pkgs (list in a string)
 # - listrepos: list currently setup repositories
 # - listppas: list currently setup ppas
+# - new_layer: create a new layer
+# - read_layers: read existing layers into an array $layers_array
+# - print_layers: print layers (existing + enabled)
+# - read_disabled_layers: read disabled layers from repository
+# - install_layers: install layers - groups of software, pkgs,  customizations, etc.
+# - clearall: clear all package installation variables: REPOS, PKGS, PKGS_RM, SNAPS
+# - installall: install REPOS, PKGS, SNAPS and remove PKGS_RM, and clearall
 
 isinstalled() {
     # 1: package file name
     ! [ -z "$(dpkg-query -l $1 2>/dev/null | grep '^ii\s*'$1'\s*')" ]
+}
+
+isinstalled_snap() {
+    # 1: snap file name
+    local snap_name="$(echo $1 | awk '{print $1}')"
+    ! [ -z "$(snap list | awk '{print $1}' | tail -n +2 | grep '^'$snap_name'$')" ]
 }
 
 requirepkg() {
@@ -131,23 +144,6 @@ installrepos() {
     fi
 }
 
-install_layers() {
-    # @: groups to install (array)
-    local groups_file=$(urf_repofile groups)
-    local groups=()
-    if [ -n $groups_file ]; then
-        urf_arrayread $groups_file
-        groups+=$read_array
-    fi
-    for group in $@; do
-        # Choose groups in the REPO, to enable automatic installation
-        if ([ -n $groups_file ] && urf_containsarray $groups $group) || \
-               ([ -z $groups_file ] && urf_yNprompt "Install group: $group? (Y/n)"); then
-            source "groups/$group.zsh"
-        fi
-    done
-}
-
 installpkgs() {
     # @: string of pkgs to install
     for pkg in ${=@}; do
@@ -165,7 +161,9 @@ installpkgs() {
 installsnaps() {
     # @: array of snaps to install
     for snap in $@; do
-        sudo snap install $=snap
+        if ! isinstalled_snap $snap; then
+            sudo snap install $=snap
+        fi
     done
 }
 
@@ -195,4 +193,73 @@ list_repos() {
 
 list_ppas() {
     list_repos | grep '^ppa:'
+}
+
+new_layer() {
+    local layer_name=$1
+    if [ -z layer_name ]; then
+        echo -n "Enter new layer name: "
+        read layer_name
+    fi
+    cp -r layers/template layers/$layer_name
+    echo "Added layer $layer_name"
+}
+
+read_layers() {
+    # Enable checking which groups are enabled on this system
+    cd layers
+    layers_array=()
+    for dir in $(ls -d */);
+    do;
+      if ! urf_contains $dir "template"; then
+          layers_array+=("$(echo $dir | sed 's/\/$//')")
+      fi
+    done
+    cd ..
+}
+
+
+print_layers() {
+		read_layers
+    urf_arrayprint $layers_array
+}
+
+read_disabled_layers() {
+    local layers_file=$(urf_repofile urf_layers)
+    local layers=()
+    if [ -n $layers_file ]; then
+        urf_arrayread $layers_file
+        layers+=$read_array
+    fi
+}
+
+install_layers() {
+    # @: layers to install (array)
+    # TODO: Create a way to list all pkgs per layer to simplify discovery
+    read_disabled_layers
+    clearall
+    read_layers
+    for layer in $layers_array; do
+        # Choose layers in the REPO, to enable automatic installation
+        if ([ -n $layers_file ] && urf_containsarray $layers $layer) || \
+               ([ -z $layers_file ] && urf_yNprompt "Install layer: $layer? (Y/n)"); then
+            echo $(urf_btitle "Layer installed" " $layer")
+            source layers/$layer/install.zsh
+        fi
+    done
+}
+
+clearall() {
+    REPOS=()
+    PKGS=""
+    PKGS_RM=""
+    SNAPS=()
+}
+
+installall() {
+    installrepos $REPOS
+    installpkgs $PKGS
+    removepkgs $PKGS_RM
+    installsnaps $SNAPS
+    clearall
 }
