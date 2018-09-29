@@ -89,6 +89,12 @@ xz-utils tk-dev"
         PKGS=$PKGS" gcc g++ make automake autoconf"
         PKGS=$PKGS" libpng-dev zlib1g-dev libpoppler-glib-dev libpoppler-private-dev imagemagick"
 
+        # Node.js
+        if ! isinstalled nodejs; then
+            curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+        fi
+        PKGS=$PKGS" nodejs"
+
         GROUPS+=("dotnetcore" "docker-ce")
         ;|
 (Linux-arm*)
