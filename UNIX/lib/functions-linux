@@ -11,7 +11,7 @@
 # - installrepos: install an array of apt-get or PPA repositories
 # - installpkgs: install pkgs (list in a string) from apt-get/PPAs
 # - installsnaps: install snaps (array of strings)
-# - installgroups: install a group of software / pkgs / etc.
+# - install_layers: install a group of software / pkgs / etc.
 # - removepkgs: remove pkgs (list in a string)
 # - listrepos: list currently setup repositories
 # - listppas: list currently setup ppas
@@ -131,7 +131,7 @@ installrepos() {
     fi
 }
 
-installgroups() {
+install_layers() {
     # @: groups to install (array)
     local groups_file=$(urf_repofile groups)
     local groups=()

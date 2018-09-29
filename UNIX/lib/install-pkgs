@@ -31,7 +31,7 @@ case $WHARDWARE in
 
         # repos: package repos & PPAs, pkgs: pkgs to install, snaps: snaps to install,
         # installers: optional installers
-        REPOS=(); PKGS=""; SNAPS=(); GROUPS=();
+        REPOS=(); PKGS=""; SNAPS=(); LAYERS=();
 
         # CLI Programs
         PKGS=$PKGS" zsh git gawk curl xsel neovim"
@@ -95,7 +95,7 @@ xz-utils tk-dev"
         fi
         PKGS=$PKGS" nodejs"
 
-        GROUPS+=("dotnetcore" "docker-ce")
+        LAYERS+=("dotnetcore" "docker-ce")
         ;|
 (Linux-arm*)
         # CLI Programs
@@ -106,7 +106,7 @@ xz-utils tk-dev"
         installrepos $REPOS
         installpkgs $PKGS
         installsnaps $SNAPS
-        installgroups $GROUPS
+        install_layers $LAYERS
         removepkgs $PKGS_RM
 
         if urf_yNprompt "Update system? (Y/n)"; then
