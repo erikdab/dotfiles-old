@@ -85,6 +85,10 @@ xz-utils tk-dev"
             wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
         fi
 
+        # Pdf-tools dependencies
+        PKGS=$PKGS" gcc g++ make automake autoconf"
+        PKGS=$PKGS" libpng-dev zlib1g-dev libpoppler-glib-dev libpoppler-private-dev imagemagick"
+
         GROUPS+=("dotnetcore" "docker-ce")
         ;|
 (Linux-arm*)
