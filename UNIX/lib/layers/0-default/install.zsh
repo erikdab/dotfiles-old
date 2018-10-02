@@ -5,6 +5,9 @@ PKGS=$PKGS" zsh git gawk curl xsel neovim"
 
 PKGS=$PKGS" lm-sensors"
 
+# Add ZRAM to create super fast swap for ML, etc. 
+PKGS=$PKGS" zram-config"
+
 # GUI Programs
 PKGS=$PKGS" keepassxc gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs"
 
