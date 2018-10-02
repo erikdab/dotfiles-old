@@ -40,6 +40,11 @@ case $WHARDWARE in
         ;|
 (Linux-x86*)
         # SOFTWARE_DIR=~/Downloads
+        if ! isinstalled google-chrome; then
+            wget -P /tmp/ https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            installdeb "google-chrome-stable" /tmp/google-chrome-stable_current_amd64.deb
+            rm -rf /tmp/google-chrome-stable_current_amd64.deb*
+        fi
         # Could simplify this, place the find inside installdeb if needed
         # installdeb "google-chrome-stable" $SOFTWARE_DIR/google-chrome-stable_current_amd64.deb
         # installdeb "steam-launcher" $SOFTWARE_DIR/steam_latest.deb
