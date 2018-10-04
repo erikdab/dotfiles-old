@@ -9,7 +9,7 @@ PKGS=$PKGS" lm-sensors"
 PKGS=$PKGS" zram-config"
 
 # GUI Programs
-PKGS=$PKGS" keepassxc gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs"
+PKGS=$PKGS" keepassxc gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs zeal"
 
 # Publishing
 PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra python-pygments pandoc"

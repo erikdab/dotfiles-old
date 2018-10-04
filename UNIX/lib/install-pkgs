@@ -1,6 +1,10 @@
 #!/usr/bin/env zsh
 echo $(urf_bold "Installing programs...")
 
+if urf_yNprompt "Update System? (Y/n)"; then
+    urf_upgrade
+fi
+
 case $WHARDWARE in
     (Darwin*)
         # if [ ! -d ~/.oh-my-zsh ]; then
@@ -13,9 +17,6 @@ case $WHARDWARE in
         fi
 
         if urf_yNprompt "Update System? (Y/n)"; then
-	          echo $(urf_bold "Ensuring Brewery is up to date...")
-	          brew update && brew outdated && brew upgrade && brew cleanup && brew cask upgrade
-
 	          echo $(urf_bold "Ensuring Cellar is fully stocked...")
 	          local wbrewfile=$(urf_repofile Brewfile)
 	          if ! urf_contains "$(brew bundle check --file=$wbrewfile)" "dependencies are satisfied"; then
@@ -30,13 +31,6 @@ case $WHARDWARE in
         source functions-linux
 
         install_layers
-
-        # Update system every so often
-        if urf_yNprompt "Update system? (Y/n)"; then
-	          echo $(urf_bold "Ensuring Packages are up to date...")
-	          # TODO: only run this if there are upgradable packages
-	          sudo apt-get update && sudo apt-get upgrade -y;
-        fi
         ;|
 (Linux-x86*)
         # SOFTWARE_DIR=~/Downloads

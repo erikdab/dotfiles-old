@@ -30,6 +30,7 @@
 # - urf_arraywrite: write array to file
 # - urf_arrayread: read array from file
 # - urf_arrayprint: print an array to stdout
+# - urf_update: update system
 
 # RUN at start (at all times)
 # - urf_setup_whoami
@@ -522,6 +523,15 @@ urf_arrayprint() {
     printf '%s\n' "${array_to_print[@]}"
 }
 
+urf_upgrade() {
+    case $WHARDWARE in
+	  (*apt-get*)
+        sudo apt update && sudo apt upgrade -y;
+        ;;
+	  (*Darwin*)
+        brew update && brew outdated && brew upgrade && brew cleanup && brew cask upgrade
+	  esac
+}
 
 urf() {
     urfilez run

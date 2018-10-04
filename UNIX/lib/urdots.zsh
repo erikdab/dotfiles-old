@@ -14,6 +14,7 @@ usage_msg() {
     # echo "\tsync - PULL+PUSH from/to Git"
     # echo "\tstatus - Git status"
     echo "\thostname [get/set] - get/set your hostname"
+    echo "\tup - update your system"
     if urf_contains $WHARDWARE Linux; then
         echo "\tlayers [new/list] - new layer/list your layers"
     fi
@@ -64,6 +65,9 @@ case $1 in
 	  (*)
 		    usage_msg
 	  esac
+	  ;;
+(up)
+	  urf_upgrade
 	  ;;
 (layers)
     if ! urf_contains $WHARDWARE Linux; then
