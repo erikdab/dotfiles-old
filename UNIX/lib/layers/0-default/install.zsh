@@ -25,3 +25,7 @@ installall
 if [ ! -z "$(dpkg -l | awk '{print $2}' | grep '^texlive.*-doc')" ]; then
 	  sudo apt-get --purge remove -y ^texlive.\*-doc$
 fi
+
+# pdftk
+REPOS+=("ppa:malteworld/ppa")
+PKGS+=$PKGS" pdftk"
