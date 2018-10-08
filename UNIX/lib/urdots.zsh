@@ -7,6 +7,7 @@ if ! type urf_check_sanity &> /dev/null; then
 fi;
 if ! urf_check_sanity; then; exit 1; fi
 
+# TODO: add zsh completions
 usage_msg() {
     echo "Usage:"
     echo "\trun - PULL Remote Repos & Run Setup (default)"
@@ -14,7 +15,9 @@ usage_msg() {
     # echo "\tsync - PULL+PUSH from/to Git"
     # echo "\tstatus - Git status"
     echo "\thostname [get/set] - get/set your hostname"
-    echo "\tup - update your system"
+    echo "\tupdate - update your system"
+    echo "\tsearch - search for package"
+    echo "\tinstall - install package"
     if urf_contains $WHARDWARE Linux; then
         echo "\tlayers [new/list] - new layer/list your layers"
     fi
@@ -66,8 +69,14 @@ case $1 in
 		    usage_msg
 	  esac
 	  ;;
-(up)
+(update)
 	  urf_upgrade
+	  ;;
+(search)
+	  urf_search $2
+	  ;;
+(install)
+	  urf_install $2
 	  ;;
 (layers)
     if ! urf_contains $WHARDWARE Linux; then

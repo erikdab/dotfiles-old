@@ -31,6 +31,8 @@
 # - urf_arrayread: read array from file
 # - urf_arrayprint: print an array to stdout
 # - urf_update: update system
+# - urf_search: search for package
+# - urf_install: install for package
 
 # RUN at start (at all times)
 # - urf_setup_whoami
@@ -524,12 +526,32 @@ urf_arrayprint() {
 }
 
 urf_upgrade() {
-    case $WHARDWARE in
-	  (*apt-get*)
+    case $WPKG in
+	  (apt-get)
         sudo apt update && sudo apt upgrade -y;
         ;;
-	  (*Darwin*)
+	  (brew)
         brew update && brew outdated && brew upgrade && brew cleanup && brew cask upgrade
+	  esac
+}
+
+urf_search() {
+    case $WPKG in
+	  (apt-get)
+        apt-cache search $1
+        ;;
+	  (brew)
+        brew search $1
+	  esac
+}
+
+urf_install() {
+    case $WPKG in
+	  (apt-get)
+        sudo apt-get install $1
+        ;;
+	  (brew)
+        brew install $1
 	  esac
 }
 
