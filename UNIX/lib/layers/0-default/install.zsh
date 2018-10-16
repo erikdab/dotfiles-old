@@ -17,7 +17,7 @@ PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra pyt
 PKGS_RM="evolution ksh"
 
 # Snaps
-SNAPS+=("pycharm-professional --classic" "intellij-idea-community --classic" "communitheme")
+SNAPS+=("pycharm-professional --classic" "intellij-idea-ultimate --classic" "communitheme")
 installall
 
 
