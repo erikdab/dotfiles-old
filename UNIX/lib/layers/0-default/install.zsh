@@ -17,7 +17,7 @@ PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra pyt
 PKGS_RM="evolution ksh"
 
 # Snaps
-SNAPS+=("pycharm-professional --classic" "intellij-idea-ultimate --classic" "communitheme")
+SNAPS+=("pycharm-professional --classic" "intellij-idea-ultimate --classic" "communitheme" "discord")
 installall
 
 
@@ -26,6 +26,10 @@ if [ ! -z "$(dpkg -l | awk '{print $2}' | grep '^texlive.*-doc')" ]; then
 	  sudo apt-get --purge remove -y ^texlive.\*-doc$
 fi
 
+# OBS Studio
+REPOS+=("ppa:obsproject/obs-studio")
+PKGS=$PKGS" ffmpeg obs-studio"
+
 # pdftk
 REPOS+=("ppa:malteworld/ppa")
-PKGS+=$PKGS" pdftk"
+PKGS=$PKGS" pdftk"
