@@ -225,7 +225,7 @@ print_layers() {
 }
 
 read_disabled_layers() {
-    local layers_file=$(urf_repofile urf_layers)
+    layers_file=$(urf_repofile urf_layers)
     layers=()
     if [ -n $layers_file ]; then
         urf_arrayread $layers_file
@@ -241,8 +241,8 @@ install_layers() {
     read_layers
     for layer in $layers_array; do
         # Allow disabling layers in the REPO, to enable automatic installation
-        if ([ -n $layers_file ] && ! urf_containsarray $layers $layer)
-           || [ -z $layers_file ]; then
+        if ([ -n $layers_file ] && ! urf_containsarray $layers $layer) || \
+           [ -z $layers_file ]; then
             echo $(urf_btitle "Layer installed" " $layer")
             source layers/$layer/install.zsh
         fi
