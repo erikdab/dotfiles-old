@@ -240,9 +240,9 @@ install_layers() {
     clearall
     read_layers
     for layer in $layers_array; do
-        # Choose layers in the REPO, to enable automatic installation
-        if ([ -n $layers_file ] && ! urf_containsarray $layers $layer) || \
-               ([ -z $layers_file ] && urf_yNprompt "Install layer: $layer? (Y/n)"); then
+        # Allow disabling layers in the REPO, to enable automatic installation
+        if ([ -n $layers_file ] && ! urf_containsarray $layers $layer)
+           || [ -z $layers_file ]; then
             echo $(urf_btitle "Layer installed" " $layer")
             source layers/$layer/install.zsh
         fi
