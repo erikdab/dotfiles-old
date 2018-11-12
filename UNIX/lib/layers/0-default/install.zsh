@@ -7,7 +7,7 @@ PKGS=$PKGS" zsh git gawk curl xsel neovim"
 PKGS=$PKGS" zram-config"
 
 # GUI Programs
-PKGS=$PKGS" zathura zathura-ps tilix conky python-nautilus emacs zeal"
+PKGS=$PKGS" zathura zathura-ps tilix conky python-nautilus emacs"
 
 # Publishing
 PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra python-pygments pandoc"

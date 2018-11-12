@@ -4,7 +4,7 @@ SNAPS+=("pycharm-professional --classic" "intellij-idea-ultimate --classic" "com
 PKGS=$PKGS" lm-sensors"
 
 # GUI Programs
-PKGS=$PKGS" keepassxc gimp anki gparted zathura zathura-ps tilix conky gnome-clocks python-nautilus emacs zeal"
+PKGS=$PKGS" keepassxc gimp anki gparted gnome-clocks zeal"
 
 # OBS Studio
 REPOS+=("ppa:obsproject/obs-studio")
