@@ -446,11 +446,18 @@ urf_set_hostname() {
     local config_url=$(urf_namedurl urfilez)
     #if [ ! -d $config_url ]; then; exit 1; fi
 
+    hostname="$(hostname)"
     local hostname_url=$config_url/hostname
-    echo -n "Enter desired hostname: "
+    echo -n "Enter desired hostname (current: $(hostname)): "
     read hostname
     echo $hostname > $hostname_url
-    case $WKERNEL in
+
+    # Read current hostname
+    export WHOST="$(hostname)"
+
+    # Set if different and reboot
+    if [ "$hostname" != "$WHOST" ]; then
+        case $WKERNEL in
         (Darwin)
             # Set computer name (as done via System Preferences → Sharing)
             sudo scutil --set ComputerName $hostname
@@ -462,12 +469,8 @@ urf_set_hostname() {
             urf_sudoecho $hostname /etc/hostname
             # TODO: modify /etc/hosts too (if old hostname is there!)
             ;;
-    esac
+        esac
 
-    # Read current hostname ask see if need to restart
-    export WHOST="$(hostname)"
-
-    if [ $hostname != $WHOST ]; then
         echo $(urf_bold "Rebooting machine to update hostname for rest of installation")
         read -s -k '?Press any key to continue.'
         sudo shutdown -r now
