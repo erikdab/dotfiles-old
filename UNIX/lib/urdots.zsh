@@ -18,6 +18,7 @@ usage_msg() {
     echo "\tupdate - update your system"
     echo "\tsearch - search for package"
     echo "\tinstall - install package"
+    echo "\tgdm-monitors - Copy user monitors config to gdm3"
     if urf_contains $WHARDWARE Linux; then
         echo "\tlayers [new/list] - new layer/list your layers"
     fi
@@ -78,6 +79,9 @@ case $1 in
 (install)
 	  urf_install $2
 	  ;;
+(gdm-monitors)
+    sudo cp ~/.config/monitors.xml /var/lib/gdm3/.config
+    ;;
 (layers)
     if ! urf_contains $WHARDWARE Linux; then
         usage_msg
