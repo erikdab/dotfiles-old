@@ -49,7 +49,9 @@ case $WHARDWARE in
     fi
     local firefox_profile="$(find $firefox_profiles -name "*.default")"
     if [ -d $firefox_profile ]; then
-	urf_lnrepo userChrome.css $firefox_profile/chrome/userChrome.css
+	      urf_lnrepo userChrome.css $firefox_profile/chrome/userChrome.css
+        urf_lnrepo userChrome.js $firefox_profile/chrome/userChrome.js
+        urf_lnrepo userChrome.xml $firefox_profile/chrome/userChrome.xml
     fi
 
     # Jetbrains

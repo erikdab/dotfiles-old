@@ -58,6 +58,8 @@ Update-RepoLink keepassxc.ini $env:LOCALAPPDATA\keepassxc\keepassxc.ini
 # Firefox
 $firefox_folder=@(gci $env:APPDATA\Mozilla\Firefox\Profiles\*.default)[0]
 Update-RepoLink "userChrome.css#Windows" "$($firefox_folder)\chrome\userChrome.css"
+Update-RepoLink "userChrome.js" "$($firefox_folder)\chrome\userChrome.js"
+Update-RepoLink "userChrome.xml" "$($firefox_folder)\chrome\userChrome.xml"
 
 # Links
 New-Item -Path $HOME\org -ItemType SymbolicLink -Value $HOME\Dropbox\org -Force
