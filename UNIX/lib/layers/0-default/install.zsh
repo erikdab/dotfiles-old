@@ -23,3 +23,10 @@ fi
 # pdftk
 REPOS+=("ppa:malteworld/ppa")
 PKGS=$PKGS" pdftk"
+
+# flatpak
+if ! isinstalled flatpak; then
+    REPOS+=("ppa:alexlarsson/flatpak")
+    PKGS=$KGS" flatpak"
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+fi

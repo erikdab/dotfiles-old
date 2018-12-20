@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+
+from=$1
+to=$2
+
+if [ -z $1 ] && [ -z $2 ]; then
+    echo "Missing source and destionation parameters."
+    exit
+fi
+
+gs \
+ -sOutputFile=$2 \
+ -sDEVICE=pdfwrite \
+ -sColorConversionStrategy=Gray \
+ -dProcessColorModel=/DeviceGray \
+ -dCompatibilityLevel=1.4 \
+ -dNOPAUSE \
+ -dBATCH \
+ $1
