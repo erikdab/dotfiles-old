@@ -14,6 +14,9 @@ urf_lnrepo gitconfig ~/.gitconfig
 urf_lnrepo zshrc ~/.zshrc
 urf_lnrepo zshenv ~/.zshenv
 
+# Live Server
+urf_lnrepo live-server.json ~/.live-server.json
+
 case $WHARDWARE in
 (*x86*)
     # Link commonly accessed folders from Dropbox
