@@ -30,3 +30,7 @@ if ! isinstalled flatpak; then
     PKGS=$KGS" flatpak"
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 fi
+
+
+REPOS+=("ppa:relan/exfat")
+PKGS=$PKGS" fuse-exfat exfat-utils"
