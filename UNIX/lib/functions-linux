@@ -135,7 +135,7 @@ installrepos() {
     for repo in $@; do
 	      if [ -z "$(list_repos | grep "$repo")" ]; then
 	          echo "Adding repository via add-apt-repository: $repo"
-	          sudo add-apt-repository "$repo"
+	          sudo add-apt-repository -y "$repo"
 	          repo_added=true
 	      fi
     done
@@ -162,7 +162,16 @@ installsnaps() {
     # @: array of snaps to install
     for snap in $@; do
         if ! isinstalled_snap $snap; then
-            sudo snap install $=snap
+            sudo snap install -y $=snap
+        fi
+    done
+}
+
+installflats() {
+    # @: array of snaps to install
+    for flat in $@; do
+        if ! flatpack list $flat; then
+            sudo flatpack install -y $=flat
         fi
     done
 }
@@ -241,8 +250,8 @@ install_layers() {
     read_layers
     for layer in $layers_array; do
         # Allow disabling layers in the REPO, to enable automatic installation
-        if ([ -n $layers_file ] && ! urf_containsarray $layers $layer) || \
-           [ -z $layers_file ]; then
+        if [ -z $layers ] || [ -z $layers_file ] || \
+               ([ -n $layers_file ] && ! urf_containsarray $layers $layer); then
             echo $(urf_btitle "Layer installed" " $layer")
             source layers/$layer/install.zsh
         fi
@@ -254,6 +263,7 @@ clearall() {
     PKGS=""
     PKGS_RM=""
     SNAPS=()
+    FLATS=()
 }
 
 installall() {
@@ -261,5 +271,6 @@ installall() {
     installpkgs $PKGS
     removepkgs $PKGS_RM
     installsnaps $SNAPS
+    installflats $FLATS
     clearall
 }

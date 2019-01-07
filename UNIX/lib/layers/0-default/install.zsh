@@ -12,6 +12,12 @@ PKGS=$PKGS" zathura zathura-ps tilix conky python-nautilus emacs firefox"
 # Publishing
 PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra python-pygments pandoc"
 
+PKGS=$PKGS" exfat-fuse exfat-utils"
+
+# pdftk
+REPOS+=("ppa:malteworld/ppa")
+PKGS=$PKGS" pdftk"
+
 PKGS_RM="evolution ksh"
 installall
 
@@ -20,17 +26,4 @@ if [ ! -z "$(dpkg -l | awk '{print $2}' | grep '^texlive.*-doc')" ]; then
 	  sudo apt-get --purge remove -y ^texlive.\*-doc$
 fi
 
-# pdftk
-REPOS+=("ppa:malteworld/ppa")
-PKGS=$PKGS" pdftk"
-
-# flatpak
-if ! isinstalled flatpak; then
-    REPOS+=("ppa:alexlarsson/flatpak")
-    PKGS=$KGS" flatpak"
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-fi
-
-
-REPOS+=("ppa:relan/exfat")
-PKGS=$PKGS" fuse-exfat exfat-utils"
+FLATS+=(" https://flathub.org/repo/appstream/org.gimp.GIMP.flatpakref")
