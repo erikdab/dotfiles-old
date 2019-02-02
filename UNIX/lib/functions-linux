@@ -170,8 +170,8 @@ installsnaps() {
 installflats() {
     # @: array of snaps to install
     for flat in $@; do
-        if ! flatpack list $flat; then
-            sudo flatpack install -y $=flat
+        if ! flatpak list $flat; then
+            sudo flatpak install -y $=flat
         fi
     done
 }

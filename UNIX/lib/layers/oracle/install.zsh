@@ -1,6 +1,6 @@
 #!/usr/bin/env
 # Perform layer installation and customization here if not yet installed
-if ! isinstalled "virtualbox"; then
+if ! isinstalled "virtualbox-6.0"; then
     wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
     wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
     # Standard "multiverse" Ubuntu repository Virtualbox

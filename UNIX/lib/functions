@@ -72,7 +72,7 @@ urf_dependencies() {
         # flatpak
         if ! isinstalled flatpak; then
             REPOS+=("ppa:alexlarsson/flatpak")
-            PKGS=$KGS" flatpak gnome-software-plugin-flatpak"
+            PKGS=$PKGS" flatpak gnome-software-plugin-flatpak"
             installall
 
             flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -85,7 +85,7 @@ urf_ln() {
     if [ ! -L "$2" ] || [ "$(readlink "$2")" != "$1" ]; then
 	      _source=${1//~/\~}
 	      _target=${2//~/\~}
-	      
+
 	      echo "Symlinking: '$_source' -> '$_target'."
 
 	      if [ -e "$2" ]; then
@@ -102,7 +102,7 @@ urf_ln() {
 		            return 1
 	          fi
 	      fi
-	      
+
 	      # Create parent directories if required
 	      mkdir -p "${2%/*}"
 	      # Remove existing files if present
@@ -114,7 +114,7 @@ urf_ln() {
 	          (Darwin*)
                 ln -Ffhs "$1" "$2"
 	      esac
-	      
+
 	      unset _source _target
     fi
 }
@@ -183,7 +183,7 @@ urf_repofile() {
 		            # Extract hardware information from file + Create regex matcher
 		            local whardware="${file#*\#}"
 		            local whardware_re=".*${whardware:gs/-/.*}.*"
-		            
+
 		            # Count priority (more hardware sections means more priority)
 		            local priority=0
 		            if urf_contains $file "#"; then
@@ -482,6 +482,8 @@ urf_check_sanity() {
     # TODO: maybe not required
     #cd ~/bin/setup
 
+    urf_dependencies
+
     return 0
 }
 
@@ -530,7 +532,7 @@ urf_set_hostname() {
 urf_get_repos() {
     local config_url=$(urf_namedurl urfilez)
     if [ ! -f $config_url ]; then; exit 1; fi
-    
+
     local repos_url=$config_url/repos
     echo "Current repos:"; cat $repos_url;
 }
@@ -538,7 +540,7 @@ urf_get_repos() {
 urf_check_repos() {
     local config_url=$(urf_namedurl urfilez)
     if [ ! -f $config_url ]; then; exit 1; fi
-    
+
     local repos_url=$config_url/repos
     if [ ! -f $repos_url ]; then
         urf_set_repos
@@ -547,7 +549,7 @@ urf_check_repos() {
 
 urf_set_repos() {
     local config_url=$(urf_namedurl urfilez)
-    
+
     local repos_url=$config_url/repos
 	  echo -n "Enter desired folder repositories from highest to lowest priority (one per line): "
     cat > $repos_url
