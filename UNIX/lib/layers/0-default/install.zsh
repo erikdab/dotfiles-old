@@ -1,7 +1,11 @@
 #!/usr/bin/env
 # Perform layer installation and customization here if not yet
 # CLI Programs
+REPOS+=("ppa:neovim-ppa/stable")
 PKGS=$PKGS" zsh git gawk curl xsel neovim"
+
+# neovim Python dependencies
+PKGS=$PKGS" python-dev python-pip python3-dev python3-pip"
 
 # Add ZRAM to create super fast swap for ML, etc.
 PKGS=$PKGS" zram-config"
