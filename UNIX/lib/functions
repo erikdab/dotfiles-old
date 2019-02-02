@@ -2,6 +2,7 @@
 
 # TODO: Add SNIPPETS! for functions!
 # Functions:
+# - urf_dependencies: Ensure urfile dependencies are satisfied
 # - urf_ln: link file from source to target
 # - urf_cprepo: copy file from repo to target
 # - urf_lnrepo: link file from repo to target
@@ -36,6 +37,49 @@
 
 # RUN at start (at all times)
 # - urf_setup_whoami
+
+urf_dependencies() {
+    case $(uname) in
+    (Darwin)
+	      if ! xcode-select -p &> /dev/null; then
+	          echo "Please install 'Command Line Tools for Xcode' first!"
+	          echo "Install using DMG from http://developer.apple.com/download/more/"
+
+	          if ! yNprompt "Do you want to download and install automatically? (y/N)"; then
+		            exit 0
+	          fi
+	      fi
+
+	      if ! type brew &>/dev/null; then
+		        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	      fi
+	      if type brew &>/dev/null; then
+		        brew install zsh
+		        brew cask install dropbox
+		        open -a Dropbox.app
+		        #echo "Recommended: Copy Home-brew cache from previous install."
+		        #open /Users/erik/Library/Caches/Homebrew
+	      else
+		        echo "Installation canceled! Complete installation before proceeding..."
+		        exit 1
+	      fi
+        ;;
+    (Linux)
+        source functions-linux
+        PKGS=$PKGS" nautilus-dropbox zsh"
+        installall
+
+        # flatpak
+        if ! isinstalled flatpak; then
+            REPOS+=("ppa:alexlarsson/flatpak")
+            PKGS=$KGS" flatpak gnome-software-plugin-flatpak"
+            installall
+
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        fi
+        ;;
+    esac
+}
 
 urf_ln() {
     if [ ! -L "$2" ] || [ "$(readlink "$2")" != "$1" ]; then
@@ -336,8 +380,14 @@ urf_setup_whoami() {
     # Host name (could be function)
     export WHOST="$(hostname)"
 
+    WVIRT="host"
+    if [ -n "$(dmesg | grep "Hypervisor detected")" ]; then
+        WVIRT="guest"
+    fi
+    export WVIRT
+
     # Hardware Distinguisher! Very useful
-    export WHARDWARE=$WKERNEL-$WARCH-$WPKG-$WDE-$WDISTRO-$WHOST
+    export WHARDWARE=$WKERNEL-$WARCH-$WPKG-$WDE-$WDISTRO-$WHOST-$WVIRT
 }
 
 urf_echo_whoami() {

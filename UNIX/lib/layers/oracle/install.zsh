@@ -7,9 +7,6 @@ if ! isinstalled "virtualbox"; then
     REPOS+=("deb https://download.virtualbox.org/virtualbox/debian bionic contrib")
     PKGS=$PKGS" virtualbox-6.0"
 
-    # Java
-    REPOS+=("ppa:linuxuprising/java")
-    PKGS=$PKGS" oracle-java10-installer"
     installall
 
     # Virtualized Ubuntu needs: sudo apt-get install build-essential linux-headers-$(uname -r)
@@ -17,3 +14,7 @@ if ! isinstalled "virtualbox"; then
     # sudo usermod -G vboxsf -a $(whoami)
     # https://www.ostechnix.com/check-linux-system-physical-virtual-machine/
 fi
+
+# Java
+REPOS+=("ppa:linuxuprising/java" "ppa:webupd8team/java")
+PKGS=$PKGS" oracle-java10-installer oracle-java8-installer"

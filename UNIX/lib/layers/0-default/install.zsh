@@ -15,6 +15,12 @@ PKGS=$PKGS" zathura zathura-ps tilix conky python-nautilus firefox"
 # Publishing
 PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra python-pygments pandoc"
 
+PKGS=$PKGS" exfat-fuse exfat-utils"
+
+# pdftk
+REPOS+=("ppa:malteworld/ppa")
+PKGS=$PKGS" pdftk"
+
 PKGS_RM="evolution ksh"
 installall
 
@@ -34,8 +40,5 @@ if ! isinstalled flatpak; then
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 fi
 
-
-REPOS+=("ppa:relan/exfat")
-PKGS=$PKGS" fuse-exfat exfat-utils"
-
 installall
+FLATS+=(" https://flathub.org/repo/appstream/org.gimp.GIMP.flatpakref")
