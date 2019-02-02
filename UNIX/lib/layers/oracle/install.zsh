@@ -1,8 +1,11 @@
 #!/usr/bin/env
 # Perform layer installation and customization here if not yet installed
 if ! isinstalled "virtualbox"; then
+    wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+    wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
     # Standard "multiverse" Ubuntu repository Virtualbox
-    PKGS=$PKGS" virtualbox"
+    REPOS+=("deb https://download.virtualbox.org/virtualbox/debian bionic contrib")
+    PKGS=$PKGS" virtualbox-6.0"
 
     # Java
     REPOS+=("ppa:linuxuprising/java")

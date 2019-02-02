@@ -3,11 +3,14 @@
 # CLI Programs
 PKGS=$PKGS" zsh git gawk curl xsel neovim"
 
-# Add ZRAM to create super fast swap for ML, etc. 
+# Add ZRAM to create super fast swap for ML, etc.
 PKGS=$PKGS" zram-config"
 
+REPOS+=("ppa:kelleyk/emacs");
+PKGS=$PKGS" emacs26"
+
 # GUI Programs
-PKGS=$PKGS" zathura zathura-ps tilix conky python-nautilus emacs firefox"
+PKGS=$PKGS" zathura zathura-ps tilix conky python-nautilus firefox"
 
 # Publishing
 PKGS=$PKGS" texlive-latex-base texlive-latex-recommended texlive-latex-extra python-pygments pandoc"
@@ -34,3 +37,5 @@ fi
 
 REPOS+=("ppa:relan/exfat")
 PKGS=$PKGS" fuse-exfat exfat-utils"
+
+installall

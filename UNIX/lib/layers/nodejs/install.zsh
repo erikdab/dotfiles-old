@@ -6,5 +6,9 @@ if ! isinstalled nodejs; then
 
     installall
 
-    npm install -g live-server
+    npm install -g js-beautify
+    npm install -g @angular/cli
+    npm install -g @nestjs/cli
+    npm install -g tern
+    npm install -g eslint
 fi
