@@ -162,7 +162,7 @@ installsnaps() {
     # @: array of snaps to install
     for snap in $@; do
         if ! isinstalled_snap $snap; then
-            sudo snap install -y $=snap
+            sudo snap install $=snap
         fi
     done
 }
