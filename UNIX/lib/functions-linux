@@ -34,6 +34,11 @@ isinstalled_snap() {
     ! [ -z "$(snap list | awk '{print $1}' | tail -n +2 | grep '^'$snap_name'$')" ]
 }
 
+isinstalled_cmd() {
+    # 1: repo name
+    [ -n "$(command -v $1)" ]
+}
+
 requirepkg() {
     # 1: package file name
     if ! isinstalled $1; then

@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env zsh
 # Perform layer installation and customization here if not yet installed
 if ! isinstalled "virtualbox"; then
     # Standard "multiverse" Ubuntu repository Virtualbox
