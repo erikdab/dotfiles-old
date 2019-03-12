@@ -1,5 +1,10 @@
 # Snaps
-SNAPS+=("pycharm-professional --classic" "intellij-idea-ultimate --classic" "communitheme" "discord")
+SNAPS+=("pycharm-professional --classic"
+        "intellij-idea-ultimate --classic"
+        "webstorm --classic"
+        "communitheme"
+        "discord"
+        "gimp")
 
 PKGS=$PKGS" lm-sensors"
 

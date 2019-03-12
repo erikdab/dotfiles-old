@@ -167,7 +167,7 @@ installsnaps() {
     # @: array of snaps to install
     for snap in $@; do
         if ! isinstalled_snap $snap; then
-            sudo snap install -y $=snap
+            sudo snap install $=snap
         fi
     done
 }
@@ -175,8 +175,8 @@ installsnaps() {
 installflats() {
     # @: array of snaps to install
     for flat in $@; do
-        if ! flatpack list $flat; then
-            sudo flatpack install -y $=flat
+        if ! flatpak list $flat; then
+            sudo flatpak install -y $=flat
         fi
     done
 }
