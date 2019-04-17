@@ -1,12 +1,12 @@
 #!/usr/bin/env zsh
 
 if ! isinstalled_cmd "onedrive"; then
-    PKGS=$PKGS" libcurl4-openssl-dev git libsqlite3-dev"
+    PKGS=$PKGS" libcurl4-openssl-dev git libsqlite3-dev libnotify-dev"
     SNAPS+=("dmd --classic" "dub --classic")
     installall
 
     cd ~/source/repos
-    git clone https://github.com/skilion/onedrive.git
+    git clone https://github.com/abraunegg/onedrive.git
     cd onedrive
     make
     sudo make install
