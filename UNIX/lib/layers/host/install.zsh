@@ -4,7 +4,8 @@ SNAPS+=("pycharm-professional --classic"
         "webstorm --classic"
         "communitheme"
         "discord"
-        "gimp")
+        "gimp"
+        "postman")
 
 PKGS=$PKGS" lm-sensors"
 
